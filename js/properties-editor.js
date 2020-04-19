@@ -58,11 +58,11 @@ $("#file").change(handleFileSelect);
 /* ---------- Property URL loading ------------ */
 
 function fetchURL(event) {
-  var url = $("#fetch-url").text();
+  var url = $("#fetch-url").val();
   var options = {};
   if ($("#fetch-auth").is(":checked")) {
-    options.username = $("#fetch-user").val().trim();
-    options.password = $("#fetch-password").val().trim();
+    options.username = decodeURI($("#fetch-user").val().trim());
+    options.password = decodeURI($("#fetch-password").val().trim());
   }
   $.get(url, options)
     .done(function (data) {
@@ -115,8 +115,8 @@ function parseProperties(properties, name) {
       // comment line
       desc = line.substring(1);
     } else if (eq > 0) {
-      var vname = escape(line.substring(0, eq).trim());
-      var val= escape(line.substring(eq + 1).trim());
+      var vname = encodeURI(line.substring(0, eq).trim());
+      var val= encodeURI(line.substring(eq + 1).trim());
       addProperty(vname, val, desc);
     } else if (line.trim()) {
       setStatus("Syntax error, line " + (i + 1) + ": " + line, {
@@ -219,6 +219,10 @@ function friendpasteUpload(name, data, onDone, onFail) {
 }
 
 $("#post").click(function () {
+  if (localStorage.getItem("nopost")) {
+    onPostDone(undefined, "https://friendpaste.com/2P0OaZhUfBH2mfWJzYm6KD/raw?rev=386261396364");
+    return;
+  }
   var username, password;
   if ($("#post-auth").is(":checked")) {
     username = $("#post-user").val().trim();
