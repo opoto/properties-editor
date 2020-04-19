@@ -1,0 +1,73 @@
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
+  <title>Properties Editor</title>
+  <meta name="description" content="Online properties file editor">
+  <link rel="stylesheet" href="css/properties-editor.css" />
+  <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+ </head>
+ <body>
+   <h1>Properties Editor</h1>
+  <div>
+    <h2>Load properties file:</h2>
+    <div>
+      From File: <input type="file" id="file" name="file" />
+    </div>
+    <div>
+      From Web: <input id="fetch-url" type="text"/> <button id="fetch">Fetch</button>
+      <label><input type="checkbox" id="fetch-auth"/>Authentication</label>
+      <table id="tfetch-auth" class="hidden">
+        <tr>
+          <td>User name</td>
+          <td><input id="fetch-user" type="text"/></td>
+        </tr>
+        <tr>
+          <td>Password</td>
+          <td><input id="fetch-password" type="password"/></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="status">
+    <span id="status-msg"></span>
+  </div>
+
+  <h2>Properties: <span id="pname-edit"><span id="pname"></span> &#128394;</span></h2>
+
+  <div id="pdesc"></div>
+  <table id="tprops">
+    <tr><td>^^ Load property to start editing ^^</td></tr>
+  </table>
+
+  <div id="buttons">
+    <button id="clear-form">Clear form</button>
+    <button id="delete-form">Delete full form</button>
+  </div>
+
+  <div>
+    <h2>Save properties file</h2>
+    <div>To File: <button id="save">Save</button></div>
+    <div>
+      To Web:
+      <input id="post-url" type="text" placeholder="Destination URL" value="https://www.friendpaste.com/"/><button id="post">POST</button>
+      <label><input type="checkbox" id="post-auth"/>Authentication</label>
+      <table id="tpost-auth" class="hidden">
+        <tr>
+          <td>User name</td>
+          <td><input id="post-user" type="text"/></td>
+        </tr>
+        <tr>
+          <td>Password</td>
+          <td><input id="post-password" type="password"/></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="output">
+  </div>
+
+  <script src="js/properties-editor.js"></script>
+</body>
