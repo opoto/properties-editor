@@ -61,8 +61,8 @@ function fetchURL(event) {
   var url = $("#fetch-url").val();
   var options = {};
   if ($("#fetch-auth").is(":checked")) {
-    options.username = decodeURI($("#fetch-user").val().trim());
-    options.password = decodeURI($("#fetch-password").val().trim());
+    options.username = $("#fetch-user").val().trim();
+    options.password = $("#fetch-password").val().trim();
   }
   $.get(url, options)
     .done(function (data) {
@@ -109,22 +109,39 @@ function parseProperties(properties, name) {
   var desc;
   var lines = properties.split('\n');
   for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
+    // spaces at beggining of line are ignored
+    var line = lines[i].trimLeft();
+    while (line.endsWith("\\")) {
+      line = line.substring(0, line.length - 1);
+      if (i+1 < lines.length) {
+        line += lines[++i].trimLeft();
+      }
+    }
+    // assignment can be '=' or ':'
     var eq = line.indexOf("=");
-    if (line.startsWith("#")) {
+    var col = line.indexOf(":");
+    var sep = col > 0 ? ((eq > 0) ? Math.min(eq, col) : col) : eq;
+    // comment can start with '#' or '!'
+    if (line.startsWith("#") || line.startsWith("!")) {
       // comment line
       desc = line.substring(1);
-    } else if (eq > 0) {
-      var vname = encodeURI(line.substring(0, eq).trim());
-      var val= encodeURI(line.substring(eq + 1).trim());
-      addProperty(vname, val, desc);
+    } else if (sep > 0) {
+      // looks like <key,value> pair
+      var vname = encodeURI(line.substring(0, sep).trimRight());
+      var val= line.substring(sep + 1).trimLeft(); // white spaces at end of line are part of value
+      if (vname) {
+        addProperty(vname, val, desc);
+      }
+      desc = undefined;
     } else if (line.trim()) {
+      // non empty line and invalid
       setStatus("Syntax error, line " + (i + 1) + ": " + line, {
         class: "status-error",
         timeout: 3
       });
       return;
     } else {
+      // ignore empty lines
       desc = undefined;
     }
   }
@@ -133,9 +150,28 @@ function parseProperties(properties, name) {
 function addProperty(name, value, desc) {
   var input = "<input type='text' value='" + value + "'/>";
   if (desc) {
-    input += "<br><span>" + desc + "</span>";
+    input += "<br/><span>" + desc + "</span>";
   }
-  $("#tprops").append("<tr><td><input type='checkbox' checked/> " + name + "</td><td>" + input + "</td></tr>");
+  $("#tprops").append("<tr>"
+  + "<td><input type='checkbox' checked/></td>"
+  + "<td>"+ name + "</td>"
+  + "<td>" + input + "</td>"
+  + "</tr>");
+  var addedRow = $("#tprops tr:last-child");
+
+  $(addedRow).find("input[type=checkbox]").change(function(event) {
+    var nameCell = addedRow.find("td:nth-child(2)");
+    var input = addedRow.find("td:nth-child(3) input");
+    if ($(event.target).is(":checked")) {
+      nameCell.removeClass("disabled");
+      input.prop("readonly", false);
+      input.prop("disabled", false);
+    } else {
+      nameCell.addClass("disabled");
+      input.prop("readonly", true);
+      input.prop("disabled", true);
+    }
+  })
 }
 
 $("#clear-form").click(clearProperties);
@@ -220,7 +256,7 @@ function friendpasteUpload(name, data, onDone, onFail) {
 
 $("#post").click(function () {
   if (localStorage.getItem("nopost")) {
-    onPostDone(undefined, "https://friendpaste.com/2P0OaZhUfBH2mfWJzYm6KD/raw?rev=386261396364");
+    onPostDone(undefined, "https://friendpaste.com/2P0OaZhUfBH2mfWJzYkIZb/raw?rev=393530653965");
     return;
   }
   var username, password;
@@ -252,3 +288,29 @@ function onPostFailed(err) {
     timeout: 2
   });
 }
+
+function test() {
+  parseProperties(`
+### Header
+
+# This is a URL
+ test = https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=
+
+    # ignored comment
+
+name=this is a dummy string aàçuù
+
+   ! multiline comment sarting with !
+ multiline  = line1   \\
+    line2 \\
+line3
+
+# this a \\
+  multiline \\
+  comment
+equation.1 : 9879=879
+
+ `, "just testing");
+}
+
+test();

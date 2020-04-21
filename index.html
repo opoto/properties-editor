@@ -20,23 +20,29 @@
   <h1>Properties Editor</h1>
   <div>
     <h2>Load properties file:</h2>
-    <div>
-      From File: <input type="file" id="file" name="file" />
-    </div>
-    <div>
-      From Web: <input id="fetch-url" type="text"/> <button id="fetch">Fetch</button>
-      <label><input type="checkbox" id="fetch-auth"/>Authentication</label>
-      <table id="tfetch-auth" class="hidden">
-        <tr>
-          <td>User name</td>
-          <td><input id="fetch-user" type="text"/></td>
-        </tr>
-        <tr>
-          <td>Password</td>
-          <td><input id="fetch-password" type="password"/></td>
-        </tr>
-      </table>
-    </div>
+    <table id="tload">
+      <tr>
+        <td>From File:</td>
+        <td><input type="file" id="file" name="file" /></td>
+      </tr>
+      <tr>
+        <td>From Web:</td>
+        <td>
+          <input id="fetch-url" type="text" class="urlinput" placeholder="URL to get properties file"/> <button id="fetch">Fetch</button>
+          <label><input type="checkbox" id="fetch-auth"/> Authentication</label>
+          <table id="tfetch-auth" class="hidden">
+            <tr>
+              <td>User name</td>
+              <td><input id="fetch-user" type="text"/></td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td><input id="fetch-password" type="password"/></td>
+            </tr>
+          </table>
+            </td>
+      </tr>
+    </table>
   </div>
 
   <div id="status">
@@ -57,22 +63,29 @@
 
   <div>
     <h2>Save properties file</h2>
-    <div>To File: <button id="save">Save</button></div>
-    <div>
-      To Web:
-      <input id="post-url" type="text" placeholder="Destination URL" value="https://www.friendpaste.com/"/><button id="post">POST</button>
-      <label><input type="checkbox" id="post-auth"/>Authentication</label>
-      <table id="tpost-auth" class="hidden">
-        <tr>
-          <td>User name</td>
-          <td><input id="post-user" type="text"/></td>
-        </tr>
-        <tr>
-          <td>Password</td>
-          <td><input id="post-password" type="password"/></td>
-        </tr>
-      </table>
-    </div>
+    <table id="tsave">
+      <tr>
+        <td>To File:</td>
+        <td><button id="save">Save</button></td>
+      </tr>
+      <tr>
+        <td>To Web:</td>
+        <td>
+          <input id="post-url" type="text" class="urlinput" placeholder="Destination URL" value="https://www.friendpaste.com/"/><button id="post">POST</button>
+          <label><input type="checkbox" id="post-auth"/> Authentication</label>
+          <table id="tpost-auth" class="hidden">
+            <tr>
+              <td>User name</td>
+              <td><input id="post-user" type="text"/></td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td><input id="post-password" type="password"/></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </div>
 
   <div id="output">
