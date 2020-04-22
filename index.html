@@ -18,9 +18,31 @@
 </head>
 <body>
   <h1>Properties Editor</h1>
+  <h2>Settings</h2>
+  <table id="tload" class="taction">
+    <tr>
+      <td>Options</td>
+      <td>
+        <button id="resetCfg">Reset Settings</button>
+        <label>Trim values right? <input id="vtrimr" type="checkbox"/></label>
+      </td>
+    </tr>
+    <tr>
+      <td><label>Encryption? <input id="encrypt" type="checkbox" class="toggle"/></label></td>
+      <td>
+        <span class="hidden toggle-encrypt">
+          Pwd: <input id="encrypt-password" type="password"/>
+          Salt: <input id="encrypt-salt" type="text" placeholder="Hex salt value"/>
+          Iter.: <select id="encrypt-iter"><option value="100000">100000</option></select>
+          H.Algo.: <select id="encrypt-alg"><option value="SHA-256">SHA-256</option></select>
+          Key Sz: <select id="encrypt-ksz"><option value="256">256</option></select>
+        </span>
+      </td>
+    </tr>
+  </table>
   <div>
     <h2>Load properties file:</h2>
-    <table id="tload">
+    <table id="tload" class="taction">
       <tr>
         <td>From File:</td>
         <td><input type="file" id="file" name="file" /></td>
@@ -29,18 +51,12 @@
         <td>From Web:</td>
         <td>
           <input id="fetch-url" type="text" class="urlinput" placeholder="URL to get properties file"/> <button id="fetch">Fetch</button>
-          <label><input type="checkbox" id="fetch-auth"/> Authentication</label>
-          <table id="tfetch-auth" class="hidden">
-            <tr>
-              <td>User name</td>
-              <td><input id="fetch-user" type="text"/></td>
-            </tr>
-            <tr>
-              <td>Password</td>
-              <td><input id="fetch-password" type="password"/></td>
-            </tr>
-          </table>
-            </td>
+          <label>Authentication? <input type="checkbox" id="fetch-auth" class="toggle"/></label>
+          <div class="hidden toggle-fetch-auth">
+            User: <input id="fetch-user" type="text"/>
+            Password <input id="fetch-password" type="password"/>
+          </div>
+        </td>
       </tr>
     </table>
   </div>
@@ -53,7 +69,7 @@
 
   <div id="pdesc"></div>
   <table id="tprops">
-    <tr><td>^^ Load property to start editing ^^</td></tr>
+    <tr><td class="centered">^^ Load property to start editing ^^</td></tr>
   </table>
 
   <div id="buttons">
@@ -63,7 +79,7 @@
 
   <div>
     <h2>Save properties file</h2>
-    <table id="tsave">
+    <table id="tsave" class="taction">
       <tr>
         <td>To File:</td>
         <td><button id="save">Save</button></td>
@@ -72,17 +88,11 @@
         <td>To Web:</td>
         <td>
           <input id="post-url" type="text" class="urlinput" placeholder="Destination URL" value="https://www.friendpaste.com/"/><button id="post">POST</button>
-          <label><input type="checkbox" id="post-auth"/> Authentication</label>
-          <table id="tpost-auth" class="hidden">
-            <tr>
-              <td>User name</td>
-              <td><input id="post-user" type="text"/></td>
-            </tr>
-            <tr>
-              <td>Password</td>
-              <td><input id="post-password" type="password"/></td>
-            </tr>
-          </table>
+          <label>Authentication? <input type="checkbox" id="post-auth" class="toggle"/></label>
+          <div class="hidden toggle-post-auth">
+            User: <input id="post-user" type="text"/>
+            Password <input id="post-password" type="password"/>
+          </div>
         </td>
       </tr>
     </table>

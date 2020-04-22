@@ -1,21 +1,13 @@
-/* ---------- Basic Auth forms ------------ */
 
-$("#fetch-auth").change(function (event) {
-  if ($("#fetch-auth").is(":checked")) {
-    $("#tfetch-auth").show();
-  } else {
-    $("#tfetch-auth").hide();
-  }
-  return false;
-});
-$("#post-auth").change(function (event) {
-  if ($("#post-auth").is(":checked")) {
-    $("#tpost-auth").show();
-  } else {
-    $("#tpost-auth").hide();
-  }
-  return false;
-});
+/* ---------- Toggle options ------------ */
+function toggle(event){
+  var id = event.target.id;
+  var op;
+  op = $(event.target).is(":checked") ? "show" : "hide";
+  $(".toggle-"+id)[op]();
+}
+$(".toggle").change(toggle);
+$(".toggle").click(toggle);
 
 /* ---------- Status messages ------------ */
 
@@ -38,6 +30,7 @@ function clearStatus() {
 /* ---------- Property file loading ------------ */
 
 function handleFileSelect(event) {
+  saveConfig();
   var file = event.target.files[0]; // File object
   var reader = new FileReader();
   reader.onload = function (event) {
@@ -57,25 +50,26 @@ $("#file").change(handleFileSelect);
 
 /* ---------- Property URL loading ------------ */
 
-function fetchURL(event) {
-  var url = $("#fetch-url").val();
-  var options = {};
-  if ($("#fetch-auth").is(":checked")) {
-    options.username = $("#fetch-user").val().trim();
-    options.password = $("#fetch-password").val().trim();
+function fetchFromURL(event) {
+  saveConfig();
+  var url = config.fetchURL;
+  var getOptions = {};
+  if (config.fetchAuth) {
+    getOptions.username = config.fetchUser;
+    getOptions.password = getFetchPassword();
   }
-  $.get(url, options)
-    .done(function (data) {
-      parseProperties(data, url.substring(url.lastIndexOf("/") + 1));
-    })
-    .fail(function () {
-      setStatus("File loading failed: " + err, {
-        class: "status-error",
-        timeout: 3
-      });
+  $.get(url, getOptions)
+  .done(function (data) {
+    parseProperties(data, url.substring(url.lastIndexOf("/") + 1));
+  })
+  .fail(function () {
+    setStatus("File loading failed: " + err, {
+      class: "status-error",
+      timeout: 3
     });
+  });
 }
-$("#fetch").click(fetchURL);
+$("#fetch").click(fetchFromURL);
 
 
 /* ---------- Property file display ------------ */
@@ -127,8 +121,11 @@ function parseProperties(properties, name) {
       desc = line.substring(1);
     } else if (sep > 0) {
       // looks like <key,value> pair
-      var vname = encodeURI(line.substring(0, sep).trimRight());
+      var vname = line.substring(0, sep).trimRight();
       var val= line.substring(sep + 1).trimLeft(); // white spaces at end of line are part of value
+      if (config.vtrimr) {
+        val = val.trimRight();
+      }
       if (vname) {
         addProperty(vname, val, desc);
       }
@@ -187,7 +184,10 @@ function getProperties() {
     var isIncluded = $(this).find("input[type=checkbox]").is(":checked");
     if (isIncluded) {
       var name = $(this).find("td:first").text().trim();
-      var value = $(this).find("input[type=text]").val().trim();
+      var value = $(this).find("input[type=text]").val().trimLeft();
+      if (config.vtrimr) {
+        value = value.trimRight();
+      }
       var desc = $(this).find("span").text().trim();
       if (desc) {
         properties += "# " + desc + "\n";
@@ -228,15 +228,16 @@ function download(filename, text) {
 }
 
 $("#save").click(function () {
+  saveConfig();
   download(getName() + ".properties", getProperties());
 });
 
 /* ---------- Property file posting ------------ */
 
 function friendpasteUpload(name, data, onDone, onFail) {
-  $.ajax({
+  var postOptions = {
     method: "POST",
-    url: "//www.friendpaste.com/",
+    url: config.postUrl,
     dataType: "json",
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({
@@ -245,7 +246,12 @@ function friendpasteUpload(name, data, onDone, onFail) {
       "password": "dummy",
       "language": "text"
     })
-  }).done(function (resp) {
+  };
+  if (config.postAuth) {
+    postOptions.username = config.postUser;
+    postOptions.password = getPostPassword();
+  }
+  $.ajax(postOptions).done(function (resp) {
     if (resp.ok) {
       onDone(resp.url + "?rev=" + resp.rev, resp.url + "/raw?rev=" + resp.rev);
     } else {
@@ -255,14 +261,10 @@ function friendpasteUpload(name, data, onDone, onFail) {
 }
 
 $("#post").click(function () {
+  saveConfig();
   if (localStorage.getItem("nopost")) {
     onPostDone(undefined, "https://friendpaste.com/2P0OaZhUfBH2mfWJzYkIZb/raw?rev=393530653965");
     return;
-  }
-  var username, password;
-  if ($("#post-auth").is(":checked")) {
-    username = $("#post-user").val().trim();
-    password = $("#post-password").val().trim();
   }
   friendpasteUpload(getName(), getProperties(), onPostDone, onPostFailed);
 });
@@ -289,6 +291,92 @@ function onPostFailed(err) {
   });
 }
 
+/* ---------- Config -------------*/
+
+var DEFAULT_CONFIG = {
+  encrypt: false,
+  encryptIter: $("#encrypt-iter option:first-child").val(),
+  encryptAlgo: $("#encrypt-alg option:first-child").val(),
+  encryptKsz: $("#encrypt-ksz option:first-child").val(),
+  vtrimr: false,
+  fetchAuth: false,
+  postUrl: "https://www.friendpaste.com",
+  postAuth: false
+}
+var CONFIG_ITEM = "properties-editor.config";
+
+var config = JSON.parse(localStorage.getItem(CONFIG_ITEM)) || DEFAULT_CONFIG;
+
+function saveConfig() {
+  config.fetchUrl = $("#fetch-url").val().trim();
+  config.fetchAuth = $("#fetch-auth").is(":checked");
+  config.fetchUser = $("#fetch-user").val().trim();
+
+  config.vtrimr = $("#vtrimr").is(":checked");
+
+  config.encrypt = $("#encrypt").is(":checked");
+  config.encryptSalt = $("#encrypt-salt").val().trim();
+  config.encryptIter = $("#encrypt-iter").val();
+  config.encryptAlgo = $("#encrypt-alg").val();
+  config.encryptKsz = $("#encrypt-ksz").val();
+
+  config.postUrl = $("#post-url").val().trim();
+  config.postAuth = $("#post-auth").is(":checked");
+  config.postUser = $("#post-user").val().trim();
+
+  localStorage.setItem(CONFIG_ITEM, JSON.stringify(config))
+}
+
+function applyConfig() {
+  $("#fetch-url").val(config.fetchUrl);
+  $("#fetch-auth").prop("checked", config.fetchAuth);
+  config.fetchAuth && $(".toggle-fetch-auth").show();
+  $("#fetch-user").val(config.fetchUser);
+
+  $("#vtrimr").prop("checked", config.vtrimr);
+
+  $("#encrypt").prop("checked", config.encrypt);
+  config.encrypt && $(".toggle-encrypt").show();
+  $("#encrypt-salt").val(config.encryptSalt);
+  $("#encrypt-iter").val(config.encryptIter);
+  $("#encrypt-alg").val(config.encryptAlgo);
+  $("#encrypt-ksz").val(config.encryptKsz);
+
+  $("#post-url").val(config.postUrl)
+  $("#post-auth").prop("checked", config.postAuth);
+  config.postAuth && $(".toggle-post-auth").show();
+  $("#post-user").val(config.postUser);
+}
+
+function getFetchPassword() {
+  return $("#fetch-password").val().trim();
+}
+function getPostPassword() {
+  return $("#post-password").val().trim();
+}
+function getEncryptPassword() {
+  return $("#encrypt-password").val().trim();
+}
+
+$("#resetCfg").click(function() {
+  config = DEFAULT_CONFIG;
+  applyConfig();
+  $("input[type=password]").val("");
+  $("input[type=checkbox]").change();
+  saveConfig();
+});
+
+$(window).on("load", function() {
+
+  applyConfig();
+
+  $(window).on("unload", function() {
+    saveConfig();
+  });
+});
+
+/* ---------- Test -------------*/
+
 function test() {
   parseProperties(`
 ### Header
@@ -307,10 +395,10 @@ line3
 
 # this a \\
   multiline \\
-  comment
+  comment with ':' assignment
 equation.1 : 9879=879
 
- `, "just testing");
+`, "just testing");
 }
 
 test();
