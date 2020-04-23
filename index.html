@@ -12,7 +12,6 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'UA-164009421-1');
   </script>
 </head>
@@ -99,7 +98,13 @@
   </div>
 
   <div id="output">
+    <div id="notcopied">Read properties file from below URL (click/tap to copy to clipboard)</div>
+    <div id="copied" class="hidden">URL copied!</div>
+    <div><input type='text' readonly='readonly' value=''/></div>
+    <div>Or scan QR Code:</div>
+    <img src=""/>
   </div>
 
+  <textarea id="debug" class="hidden"></textarea>
   <script src="js/properties-editor.js"></script>
 </body>

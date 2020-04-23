@@ -17,6 +17,7 @@ h1 {
   padding: 15px;
   background-color: lightsteelblue;
   border-bottom: 1px solid black;
+  box-shadow: 0 2px 2px 1px #888;
 }
 
 
@@ -26,6 +27,8 @@ h2 {
   padding: 5px;
   background-color: lightgray;
   border-bottom: 1px solid black;
+  border-top: 1px solid rgb(186, 186, 186);
+  box-shadow: 0 2px 2px 1px #888;
 }
 
 button {
@@ -112,17 +115,17 @@ input[type=text]{
   border: 2px solid white;
   padding: 10px;
 }
-#tprops td:first-child {
+#tprops td.tdincl, #tprops td.tdenc {
+  text-align: center;
+  width:1%;
+  white-space:nowrap;
+}
+#tprops td.tdname {
   text-align: right;
   width:1%;
   white-space:nowrap;
 }
-#tprops td:nth-child(2) {
-  text-align: right;
-  width:1%;
-  white-space:nowrap;
-}
-#tprops td:nth-child(3) span {
+#tprops td.tdvalue span {
   color: grey;
   font-size: 80%;
   font-style: italic;
@@ -130,10 +133,43 @@ input[type=text]{
 #tprops input[type=text]{
   width: 100%;
 }
+
+#output {
+  text-align: center;
+}
+#output div {
+  margin-top: 15px;
+}
+#output input {
+  width: 80%;
+}
+#output img {
+  margin: 10px auto 10px auto;
+}
+
 .centered {
   text-align: center !important;
 }
 .disabled {
   text-decoration: line-through;
   color: gray;
+}
+#debug {
+  width: 100%;
+  height: 300px;
+}
+
+
+input[type="checkbox"] {
+  height: 15px;
+  width: 15px;
+}
+input[type="checkbox"]:not(:checked) {
+  background: #fff;
+  border: 1px solid #ccc;
+}
+input[type="checkbox"]:checked {
+  background: black;
+  color: white;
+  content: "X";
 }
