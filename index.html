@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
   <title>Properties Editor</title>
   <meta name="description" content="Online properties file editor">
+  <link rel="stylesheet" href="css/fontello.css" />
   <link rel="stylesheet" href="css/properties-editor.css" />
   <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
   <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -12,12 +13,11 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'UA-164009421-1');
   </script>
 </head>
 <body>
-  <h1>Properties Editor</h1>
+  <h1>Properties Editor <i class="icon icon-shield"></i></h1>
   <h2>Settings</h2>
   <table id="tload" class="taction">
     <tr>
@@ -32,10 +32,11 @@
       <td>
         <span class="hidden toggle-encrypt">
           Pwd: <input id="encrypt-password" type="password"/>
-          Salt: <input id="encrypt-salt" type="text" placeholder="Hex salt value"/>
-          Iter.: <select id="encrypt-iter"><option value="100000">100000</option></select>
-          H.Algo.: <select id="encrypt-alg"><option value="SHA-256">SHA-256</option></select>
-          Key Sz: <select id="encrypt-ksz"><option value="256">256</option></select>
+          <span class="hidden">
+            Iter.: <select id="encrypt-iter"><option value="100000">100000</option></select>
+            H.Algo.: <select id="encrypt-alg"><option value="SHA-256">SHA-256</option></select>
+            Key Sz: <select id="encrypt-ksz"><option value="256">256</option></select>
+          </span>
         </span>
       </td>
     </tr>
@@ -65,7 +66,7 @@
     <span id="status-msg"></span>
   </div>
 
-  <h2>Properties: <span id="pname-edit"><span id="pname"></span> &#128394;</span></h2>
+  <h2>Properties: <span id="pname-edit"><span id="pname"></span> <i class="icon icon-pencil"></i></span></h2>
 
   <div id="pdesc"></div>
   <table id="tprops">
@@ -99,7 +100,13 @@
   </div>
 
   <div id="output">
+    <div id="notcopied">Read properties file from below URL (click/tap to copy to clipboard)</div>
+    <div id="copied" class="hidden">URL copied!</div>
+    <div><input type='text' readonly='readonly' value=''/></div>
+    <div>Or scan QR Code:</div>
+    <img src=""/>
   </div>
 
+  <textarea id="debug" class="hidden"></textarea>
   <script src="js/properties-editor.js"></script>
 </body>

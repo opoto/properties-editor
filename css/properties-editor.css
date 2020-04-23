@@ -17,6 +17,7 @@ h1 {
   padding: 15px;
   background-color: lightsteelblue;
   border-bottom: 1px solid black;
+  box-shadow: 0 2px 2px 1px #888;
 }
 
 
@@ -26,9 +27,11 @@ h2 {
   padding: 5px;
   background-color: lightgray;
   border-bottom: 1px solid black;
+  border-top: 1px solid rgb(186, 186, 186);
+  box-shadow: 0 2px 2px 1px #888;
 }
 
-button {
+button, input[type=file] {
   border: 1px solid #777;
   border-radius: 3px;
   padding: 3px 8px;
@@ -37,11 +40,13 @@ button {
   font-size: 13px;
   text-align: center;
 }
-button:hover {
+button:hover, input[type=file]:hover {
   background-color: #c4e2a5;
 }
+
 button:active {
-  background-color: #87ba43;
+  color: white;
+  font-weight: bold;
 }
 
 input[type=text]{
@@ -112,17 +117,17 @@ input[type=text]{
   border: 2px solid white;
   padding: 10px;
 }
-#tprops td:first-child {
+#tprops td.tdincl, #tprops td.tdenc {
+  text-align: center;
+  width:1%;
+  white-space:nowrap;
+}
+#tprops td.tdname {
   text-align: right;
   width:1%;
   white-space:nowrap;
 }
-#tprops td:nth-child(2) {
-  text-align: right;
-  width:1%;
-  white-space:nowrap;
-}
-#tprops td:nth-child(3) span {
+#tprops td.tdvalue span {
   color: grey;
   font-size: 80%;
   font-style: italic;
@@ -130,10 +135,99 @@ input[type=text]{
 #tprops input[type=text]{
   width: 100%;
 }
+
+#output {
+  text-align: center;
+}
+#output div {
+  margin-top: 15px;
+}
+#output input {
+  width: 80%;
+}
+#output img {
+  margin: 10px auto 10px auto;
+}
+
 .centered {
   text-align: center !important;
 }
 .disabled {
   text-decoration: line-through;
   color: gray;
+}
+#debug {
+  width: 100%;
+  height: 300px;
+}
+
+
+input[type="checkbox"] {
+  height: 15px;
+  width: 15px;
+}
+input[type="checkbox"]:not(:checked) {
+  background: #fff;
+  border: 1px solid #ccc;
+}
+input[type="checkbox"]:checked {
+  background: black;
+  color: white;
+  content: "X";
+}
+
+.icon
+{
+  font-family: "fontello";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: .2em;
+  text-align: center;
+  /* opacity: .8; */
+
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+
+  /* fix buttons height, for twitter bootstrap */
+  line-height: 1em;
+
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+  margin-left: .2em;
+
+  /* You can be more comfortable with increased icons size */
+  /* font-size: 120%; */
+
+  /* Font smoothing. That was taken from TWBS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+}
+
+.encrypted-val {
+  background-color: rgb(251, 216, 216);
+}
+.encrypted {
+  color: red;
+  cursor: pointer;
+  font-size: 120%;
+}
+.encrypted:before {
+  content: '\e802';
+}
+.cleartext  {
+  color: grey;
+  cursor: pointer;
+  font-size: 120%;
+}
+.cleartext:before {
+  content: '\e803';
 }
