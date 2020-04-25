@@ -130,7 +130,7 @@ function clearProperties() {
   });
 }
 
-function importProperties(properties, name) {
+async function importProperties(properties, name) {
   deleteProperties();
   if (name) {
     var slash = name.lastIndexOf("/");
@@ -168,7 +168,7 @@ function importProperties(properties, name) {
         val = val.trimRight();
       }
       if (vname) {
-        addProperty(vname, val, desc);
+        await addProperty(vname, val, desc);
       }
       desc = undefined;
     } else if (line.trim()) {
