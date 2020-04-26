@@ -244,6 +244,11 @@ input[type="checkbox"]:checked {
 .cleartext:before {
   content: '\e803';
 }
-.checkspan-checked, .checkspan-unchecked, #generate-password {
+.checkspan-checked,
+.checkspan-unchecked,
+#generate-password,
+#pname-edit,
+#clear-editor,
+.encbut {
   cursor: pointer;
 }

@@ -32,13 +32,13 @@
       <td><label>Encryption</label></td>
       <td>
         Password:
-        <span id="viewpwd" value="unchecked">
+        <span id="viewpwd" value="unchecked" title="Toggle password visibility">
           <i class="checkspan-unchecked icon icon-eye"></i>
           <i class="checkspan-checked icon icon-eye-off"></i>
         </span>
         <input id="encrypt-password" type="password" value="p4ssw0rd"/>
-        <i id="generate-password" class="icon icon-arrows-cw"></i>
-        <span id="password-options" value="unchecked" class="toggle">
+        <i id="generate-password" class="icon icon-arrows-cw" title="Generate password"></i>
+        <span id="password-options" value="unchecked" class="toggle" title="Settings">
           <i class="checkspan-unchecked icon icon-cog"></i>
           <i class="checkspan-checked icon icon-cancel"></i>
         </span>
@@ -92,7 +92,7 @@
     <span id="status-msg"></span>
   </div>
 
-  <h2>Properties: <span id="pname-edit"><span id="pname"></span> <i class="icon icon-pencil"></i></span></h2>
+  <h2>Properties: <span id="pname-edit" title="Click to edit"><span id="pname"></span> <i class="icon icon-pencil"></i></span></h2>
 
   <div id="pdesc"></div>
   <table id="tprops">
@@ -138,7 +138,7 @@
     <img src=""/>
   </div>
 
-  <h2>Editor <i id="clear-editor" class="icon icon-cancel"></i></h2>
+  <h2>Editor <i id="clear-editor" class="icon icon-cancel" title="Clear editor"></i></h2>
   <textarea id="editor"></textarea>
   <script src="js/properties-editor.js"></script>
 </body>

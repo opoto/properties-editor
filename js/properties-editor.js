@@ -211,7 +211,7 @@ async function addProperty(name, value, desc) {
     // 2. mark as encrypted
     inputclass = "class='encrypted-val'";
   }
-  var encbut = "<span class='encbut' value='" + isEncrypted + "'>"
+  var encbut = "<span class='encbut' value='" + isEncrypted + "' title='Toggle encryption'>"
   + "<i class='checkspan-checked icon encrypted'></i>"
   + "<i class='checkspan-unchecked icon cleartext'></i>"
   + "</span>";
