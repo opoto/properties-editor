@@ -7,10 +7,32 @@
   <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
   <meta name="description" content="Encryption / decvryption library">
   <title>EncDec lib</title>
+  <link rel="stylesheet" href="css/properties-editor.css" />
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 </head>
 
 <body>
+  <h1>EncDec lib</h1>
+  <p>
+    This page demonstrates how the encdec js lib works.
+    It encrypts a clear text with an AES-GCM key derived from a password using PBKDF2.
+    Encryption output is an encoded string in the form:
+  </p>
+  <p>
+    <code>
+      iterations#digest#key-size#salt#iv#ciphertext
+    </code>
+  </p>
+  <p>
+    The salt, iv and cipher text values are base64 encoded.
+  </p>
+  <p>
+    Encryption is configurable, but this page uses default config:
+    <ul>
+      <li>PBKDF2 is using SHA-256, 100000 iterations, and a random 16 bytes salt to generate a 256 bits key.</li>
+      <li>AES-GCM is using a random IV</li>
+    </ul>
+  </p>
   <table>
     <tr>
       <td>Clear text</td>
