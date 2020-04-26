@@ -41,7 +41,7 @@ button, #file-label {
   text-align: center;
 }
 button:hover,
-#file-labe:hover {
+#file-label:hover {
   background-color: #c4e2a5;
 }
 input[type=text],
@@ -50,7 +50,8 @@ input[type=password] {
   margin: 0;
   font-size: 13px;
 }
-button:active {
+button:active,
+#file-label span:active {
   color: white;
   font-weight: bold;
 }
