@@ -116,6 +116,7 @@ button:active {
   border-collapse: collapse;
   background-color: rgb(204, 233, 145);
   width: 100%;
+  table-layout: auto;
 }
 #tprops td {
   vertical-align: top;
@@ -130,7 +131,13 @@ button:active {
 #tprops td.tdname {
   text-align: right;
   width:1%;
-  white-space:nowrap;
+  max-width:700px;
+  /*white-space:nowrap;*/
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#tprops td.tdvalue {
+  width: 100%;
 }
 #tprops td.tdvalue span {
   color: grey;

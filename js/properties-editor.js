@@ -228,6 +228,7 @@ async function addProperty(name, value, desc) {
   var addedRow = $("#tprops tr:last-child");
   // use jquery to set values to avoid XSS
   addedRow.find("td.tdname").text(name);
+  addedRow.find("td.tdname").attr("title",name);
   addedRow.find("td.tdvalue input").val(value);
   if (desc) {
     addedRow.find("td.tdvalue span").text(desc);
@@ -421,7 +422,7 @@ function onPostFailed(err) {
 
 async function displayProperties() {
   var properties = await exportProperties();
-  $("#editor").val("## " + getName() + ".properties:\n" + properties);
+  $("#editor").val("## " + getName() + ".properties\n" + properties);
 }
 $("#display").click(displayProperties);
 
@@ -584,7 +585,7 @@ base64=zNkh0nLsZXrbWHKeHTKA==
 color=#987AD3
 dummy=' onclick='alert("bomb")'
 
-`, "just testing");
+`, "Sample");
 }
 
 test();
