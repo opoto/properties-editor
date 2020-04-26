@@ -33,6 +33,14 @@
       <li>AES-GCM is using a random IV</li>
     </ul>
   </p>
+  <p>
+    In addition encdec includes a simple password generator. Options are:
+    <ul>
+      <li>Password length</li>
+      <li>Characters to include: numeric, alphabet, and symbols</li>
+    </ul>
+    Ambiguous characters are excluded (1 i I l L 0 o O). 0 and 1 are included when not mixed with alphabet.
+  </p>
   <table>
     <tr>
       <td>Clear text</td>
@@ -60,7 +68,7 @@
     </tr>
   </table>
   <div id="log"></div>
-  <script src="encdec.js"></script>
+  <script src="js/encdec.js"></script>
   <script>
 
 if (isCryptoSupported()) {
