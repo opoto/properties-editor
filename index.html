@@ -33,8 +33,8 @@
       <td>
         Password:
         <span id="viewpwd" value="unchecked">
-          <i class="checkspan-checked icon icon-eye"></i>
-          <i class="checkspan-unchecked icon icon-eye-off"></i>
+          <i class="checkspan-unchecked icon icon-eye"></i>
+          <i class="checkspan-checked icon icon-eye-off"></i>
         </span>
         <input id="encrypt-password" type="password" value="p4ssw0rd"/>
         <i id="generate-password" class="icon icon-arrows-cw"></i>
@@ -64,8 +64,15 @@
     <h2>Load properties file:</h2>
     <table id="tload" class="taction">
       <tr>
-        <td>From File:</td>
-        <td><input type="file" id="file" name="file" /></td>
+        <td>From:</td>
+        <td>
+          <label id="file-label">
+            <input type="file" id="file" name="file" accept=".properties, .config, .cfg, .conf, .settings"/>
+            <span>File</span>
+          </label>
+          <label>&nbsp;or</label>
+          <button id="parse">Editor</button>
+        </td>
       </tr>
       <tr>
         <td>From Web:</td>
@@ -101,13 +108,18 @@
     <h2>Save properties file</h2>
     <table id="tsave" class="taction">
       <tr>
-        <td>To File:</td>
-        <td><button id="save">Save</button></td>
+        <td>To:</td>
+        <td>
+          <button id="save">File</button>
+          <label>or</label>
+          <button id="display">Editor</button>
+        </td>
       </tr>
       <tr>
         <td>To Web:</td>
         <td>
-          <input id="post-url" type="text" class="urlinput" placeholder="Destination URL" value="https://www.friendpaste.com/"/><button id="post">POST</button>
+          <input id="post-url" type="text" class="urlinput" placeholder="Destination URL" value="https://www.friendpaste.com/"/>
+          <button id="post">Post</button>
           <label>Authentication? <input type="checkbox" id="post-auth" class="toggle"/></label>
           <div class="hidden toggle-post-auth">
             User: <input id="post-user" type="text"/>
@@ -126,6 +138,7 @@
     <img src=""/>
   </div>
 
-  <textarea id="debug" class="hidden"></textarea>
+  <h2>Editor <i id="clear-editor" class="icon icon-cancel"></i></h2>
+  <textarea id="editor"></textarea>
   <script src="js/properties-editor.js"></script>
 </body>
