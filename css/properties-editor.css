@@ -118,6 +118,15 @@ button:active,
   width: 100%;
   table-layout: auto;
 }
+
+#tprops tr:first-child {
+  background-color: #f0f0f0;
+}
+
+tr.filtered-out {
+  visibility: collapse;
+}
+
 #tprops td {
   vertical-align: top;
   border: 2px solid white;

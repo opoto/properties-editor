@@ -68,6 +68,12 @@ const getPbkdf2Key = async (password, config) => {
   return key;
 }
 
+const ENCRYPTED_KEYWORD = "ENC";
+
+function isEncodedEncrypted(value) {
+  return (value && value.startsWith(ENCRYPTED_KEYWORD + "(") && value.trim().endsWith(")"));
+}
+
  /**
   * Encrypts plaintext using AES-GCM with supplied password, for decryption with aesGcmDecrypt().
   *
@@ -80,7 +86,7 @@ const getPbkdf2Key = async (password, config) => {
 const aesGcmEncrypt = async (plaintext, password, config) => {
 
   if (!plaintext) {
-    return { encoded: "ENC()" };
+    return { encoded: ENCRYPTED_KEYWORD + "()" };
   }
   config = config || {};
   config.iterations = config["iterations"] || 100000;
@@ -97,7 +103,7 @@ const aesGcmEncrypt = async (plaintext, password, config) => {
   // encrypt plaintext using key
   const ciphered = await crypto.subtle.encrypt({name: 'AES-GCM', iv: iv }, key, ptUint8);
 
-  const encoded = "ENC("
+  const encoded = ENCRYPTED_KEYWORD + "("
    + config.iterations + "#"
    + config.algorithm + "#"
    + config.keySize + "#"
@@ -129,7 +135,7 @@ const aesGcmEncrypt = async (plaintext, password, config) => {
   */
 const aesGcmDecrypt = async (b64ciphertext, password, config) => {
 
-  if (b64ciphertext.startsWith("ENC(")) {
+  if (b64ciphertext.startsWith(ENCRYPTED_KEYWORD + "(")) {
     if (config) {
       throw new Exception("Both config and encoded mode");
     }
@@ -166,11 +172,19 @@ const aesGcmDecrypt = async (b64ciphertext, password, config) => {
   return new TextDecoder().decode(deciphered);
 }
 
+/**
+ * Generates a random password in selected characters set
+ *
+ * @param {Number} size
+ * @param {Boolean} withNum
+ * @param {Boolean} withAlpha
+ * @param {Boolean} withSymbols
+ */
 function generatePassword(size, withNum, withAlpha, withSymbols) {
   // avoid co-existence of ambiguous chars: 0 o O, i I l L 1
   const num = "23456789";
   const numAmbiguous = "01";
-  const alpha = "abcdefghjkmnpqrstuvwxzABCDEFGHJKMNPQRSTUVWXZ";
+  const alpha = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ";
   const symbols = ",.!?;:&=+-*/_";
   var chars = "";
   if (withNum) {
@@ -182,9 +196,11 @@ function generatePassword(size, withNum, withAlpha, withSymbols) {
   if (withAlpha) chars += alpha;
   if (withSymbols) chars += symbols;
   var pwd = "";
-  for (i = size; i > 0; i--) {
-    var rnd = Math.round(Math.random() * chars.length);
-    pwd += chars.charAt(rnd);
+  const array = new Uint8Array(size*2);
+  window.crypto.getRandomValues(array);
+  for (let i = size; i > 0; i--) {
+    var pos = Math.floor((array[i] * (chars.length)) / 256);
+    pwd += chars.charAt(pos);
   }
   return pwd;
 }

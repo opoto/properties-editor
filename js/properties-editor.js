@@ -3,31 +3,39 @@
 function toggle(event){
   var id = event.currentTarget.id;
   var op;
+  var view;
   if (event.currentTarget.tagName.toUpperCase() == "INPUT") {
-    op = $(event.currentTarget).is(":checked") ? "show" : "hide";
-  } else {
-    op = "toggle";
+    view = $(event.currentTarget).is(":checked");
   }
-  $(".toggle-"+id)[op]();
+  $(".toggle-"+id).toggle(view);
 }
 $(".toggle").click(toggle);
 
 function setCheckspan(element, func) {
-  var cs = $(element);
-  var isChecked = cs.attr("value") == "checked";
+  var isChecked = element.attr("value") == "checked";
   var tohide = isChecked ? "checkspan-unchecked" : "checkspan-checked";
-  cs.find("."+tohide).hide();
-  cs.click(function (event){
-    cs.find(".checkspan-unchecked, .checkspan-checked").toggle();
-    var wasChecked = cs.attr("value") == "checked";
-    cs.attr("value", wasChecked ? "" : "checked");
-    if (func) func(!wasChecked);
+  element.find("."+tohide).hide();
+  var clickCheckspan = function (event, isDblClick) {
+    element.find(".checkspan-unchecked, .checkspan-checked").toggle();
+    var wasChecked = element.attr("value") == "checked";
+    element.attr("value", wasChecked ? "" : "checked");
+    if (func) func(!wasChecked, isDblClick);
+  }
+  element.click(clickCheckspan);
+  element.dblclick(function (event) {
+    clickCheckspan(event, true);
   });
 }
 function isCheckspanSelected(element) {
-  var cs = $(element);
-  var checked = cs.attr("value") == "checked";
+  var checked = element.attr("value") == "checked";
   return checked;
+}
+function setCheckspanSelected(element, isSelected) {
+  if (isCheckspanSelected(element) != isSelected) {
+    element.click();
+    return true;
+  }
+  return false;
 }
 
 /* ---------- Status messages ------------ */
@@ -49,7 +57,6 @@ function clearStatus() {
 }
 
 /* ------------------- Encryption ----------------- */
-// TODO
 
  async function decryptPValue(ciphered) {
   const decrypted = await aesGcmDecrypt(ciphered, getEncryptPassword());
@@ -58,6 +65,12 @@ function clearStatus() {
 async function encryptPValue(cleartxt) {
   const encrypted = await aesGcmEncrypt(cleartxt, getEncryptPassword());
   return encrypted.encoded;
+}
+
+function isSensitiveName(name) {
+  var nameUC = name.toUpperCase();
+  return (nameUC.indexOf("KEY") > 0 || nameUC.indexOf("PASSWORD") > 0
+    || nameUC.indexOf("PWD") > 0 || nameUC.indexOf("SECRET") > 0);
 }
 
 /* ---------- Property file loading ------------ */
@@ -144,7 +157,8 @@ async function importProperties(properties, name) {
     $("#pname").text(name);
   }
   $("#editor").val(properties);
-  var desc,
+  addPropertiesHeader();
+  var desc = [],
     errnames = "";
   var lines = properties.split('\n');
   for (var i = 0; i < lines.length; i++) {
@@ -163,7 +177,7 @@ async function importProperties(properties, name) {
     // comment can start with '#' or '!'
     if (line.startsWith("#") || line.startsWith("!")) {
       // comment line
-      desc = line.substring(1);
+      desc.push(line.substring(1));
     } else if (sep > 0) {
       // looks like <key,value> pair
       var vname = line.substring(0, sep).trimRight();
@@ -176,7 +190,7 @@ async function importProperties(properties, name) {
           errnames += "  - " + vname + "\n";
         }
       }
-      desc = undefined;
+      desc = [];
     } else if (line.trim()) {
       // non empty line and invalid
       setStatus("Syntax error, line " + (i + 1) + ": " + line, {
@@ -186,7 +200,7 @@ async function importProperties(properties, name) {
       return;
     } else {
       // ignore empty lines
-      desc = undefined;
+      desc = [];
     }
   }
   if (errnames) {
@@ -194,12 +208,58 @@ async function importProperties(properties, name) {
   }
 }
 
+function addPropertiesHeader() {
+  $("#tprops").append("<tr>"
+    + "<td id='tdinclh'><input type='checkbox' checked/></td>"
+    + "<td id='tdnameh'><input id='namefilter' type='text'/></td>"
+    + "<td id='tdench'>"
+    + "  <span id='encbuth' value='' title='Toggle encryption'>"
+    + "    <i class='checkspan-checked icon encrypted'></i>"
+    + "    <i class='checkspan-unchecked icon cleartext'></i>"
+    + "  </span>"
+    + "</td>"
+    + "<td id='tdvalueh'><input id='valuefilter' type='text'/></td>"
+    + "</tr>");
+  var ench = $("#encbuth");
+  setCheckspan(ench, function (isChecked, isDblClick) {
+    if (isDblClick) console.log("double");
+    var isSelected = isCheckspanSelected(ench);
+    $("#tprops tr").each(function(idx, row) {
+      if (idx == 0) return; // skip header row
+      var name = $(row).find("td.tdname").text();
+      var enc = $(row).find(".tdenc .encbut");
+      if (!isDblClick || !isSelected || isSensitiveName(name)) {
+        setCheckspanSelected(enc, isSelected);
+      }
+    });
+  });
+  $("#tdinclh input").change(function (event) {
+    var cb = $(".tdincl input");
+    cb.prop("checked", event.currentTarget.checked);
+    cb.change();
+  });
+
+  $("#namefilter, #valuefilter").keyup(function(e) {
+    if ((e.keyCode >= 46) || (e.keyCode == 8) || (e.keyCode == 32)) {
+      const namef = $("#namefilter").val().trim();
+      const valf = $("#valuefilter").val().trim();
+      $("#tprops tr").each(function (idx, row) {
+        if (idx == 0) return; // skip header row
+        var name = $(row).find("td.tdname").text();
+        var value = $(row).find(".tdvalue input[type=text]").val().trimLeft();
+        var op = ((!namef || name.indexOf(namef) >= 0) && (!valf || value.indexOf(valf) >= 0)) ? "removeClass" : "addClass";
+        $(row)[op]("filtered-out");
+      });
+    }
+  });
+}
+
 async function addProperty(name, value, desc) {
   var encbut,
    inputclass ="",
    isEncrypted = "unchecked",
    noerror = true;
-  if (value && value.startsWith("ENC(") && value.trim().endsWith(")")) {
+  if (isEncodedEncrypted(value)) {
     // value is encrypted
     try {
       value = await decryptPValue(value);
@@ -216,7 +276,7 @@ async function addProperty(name, value, desc) {
   + "<i class='checkspan-unchecked icon cleartext'></i>"
   + "</span>";
   var input = "<input type='text' value='' " + inputclass + "/>";
-  if (desc) {
+  if (desc.length) {
     input += "<br/><span></span>";
   }
   $("#tprops").append("<tr>"
@@ -230,14 +290,16 @@ async function addProperty(name, value, desc) {
   addedRow.find("td.tdname").text(name);
   addedRow.find("td.tdname").attr("title",name);
   addedRow.find("td.tdvalue input").val(value);
-  if (desc) {
-    addedRow.find("td.tdvalue span").text(desc);
-  }
+  var comments = addedRow.find("td.tdvalue span");
+  desc.forEach( descLine => {
+    comments.append($($.parseHTML("<div></div>")).text(descLine));
+  });
 
+  var inclcb = addedRow.find(".tdincl input[type=checkbox]");
+  var input = addedRow.find("td.tdvalue input, td.tdenc input");
+  var nameCell = addedRow.find("td.tdname");
   addedRow.find(".tdincl input[type=checkbox]").change(function(event) {
-    var nameCell = addedRow.find("td.tdname");
-    var input = addedRow.find("td.tdvalue input, td.tdenc input");
-    if ($(event.target).is(":checked")) {
+    if (inclcb.is(":checked")) {
       nameCell.removeClass("disabled");
       input.prop("readonly", false);
       input.prop("disabled", false);
@@ -248,7 +310,6 @@ async function addProperty(name, value, desc) {
     }
   });
   setCheckspan(addedRow.find(".tdenc .encbut"),function(isChecked) {
-    var input = $(event.currentTarget).parents("tr").find("input[type=text]");
     if (isChecked) {
       input.addClass("encrypted-val");
     } else {
@@ -274,7 +335,7 @@ async function exportProperties() {
     const row = rows[i];
     var isIncluded = $(row).find(".tdincl input[type=checkbox]").is(":checked");
     if (isIncluded) {
-      var name = $(row).find("td.tdname").text().trim();
+      var name = $(row).find("td.tdname").text();
       var value = $(row).find(".tdvalue input[type=text]").val().trimLeft();
       if (config.vtrimr) {
         value = value.trimRight();
@@ -288,9 +349,7 @@ async function exportProperties() {
           errname += "  - " + name + "\n";
         }
       } else {
-        var nameUC = name.toUpperCase();
-        if (nameUC.indexOf("KEY") > 0 || nameUC.indexOf("PASSWORD") > 0
-        || nameUC.indexOf("PWD") > 0 || nameUC.indexOf("SECRET") > 0) {
+        if (isSensitiveName(name)) {
           riskynames += "  - " + name + "\n";
         }
       }
@@ -430,6 +489,10 @@ $("#clear-editor").click(function() {
   $("#editor").val("");
 });
 
+setCheckspan($("#vieweditor"), function (isChecked) {
+  $("#editor").toggle(isChecked);
+});
+
 
 /* ---------- Config -------------*/
 
@@ -509,7 +572,7 @@ $("#resetCfg").click(function() {
 // Log errors
 window.onerror = function(messageOrEvent, source, line, row, err) {
   var errmsg = messageOrEvent.toString() + " [" + source + ": " + line + ", " + row + "]";
-  error(errmsg);
+  console.error(errmsg);
   var label = {
     path: window.location.pathname,
     ua: navigator.userAgent
@@ -527,11 +590,8 @@ window.onerror = function(messageOrEvent, source, line, row, err) {
 /* ------------------- Password ------------------ */
 
 setCheckspan($("#viewpwd"), function(isChecked){
-  if (isChecked) {
-    $("#encrypt-password").attr("type", "text");
-  } else {
-    $("#encrypt-password").attr("type", "password");
-  }
+  var type = isChecked ? "text" : "password";
+  $("#encrypt-password").attr("type", type);
 });
 setCheckspan($("#password-options"));
 
@@ -568,12 +628,15 @@ name=this is a dummy string aàçuù
     line2 \\
 line3
 
+# ignored comment
+
 # this a \\
   multiline \\
   comment with ':' assignment
 equation.1 : 9879=879
 
-# very secret
+# This a very secret password
+# Make sure it is encrypted
 my.password=ENC(100000#SHA-256#256#WWzNkh0nLsZXrbWHKeHTKA==#7Ra57/n/bkpV7xi92YdkFw==#DfeWKrYiemNhOMZ2uaRc7vCf0o96loddlJuTIBnZk0heHk5O)
 
 # so secret it's not even written here
