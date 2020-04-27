@@ -346,7 +346,7 @@ async function exportProperties() {
           value = await encryptPValue(value);
         } catch (err) {
           value = "ERROR: encryption failed";
-          errname += "  - " + name + "\n";
+          errnames += "  - " + name + "\n";
         }
       } else {
         if (isSensitiveName(name)) {
@@ -361,7 +361,7 @@ async function exportProperties() {
     }
   }
   if (errnames) {
-    if (!confirm("ERROR while encrypting following properties, continue?\n" + errames)) {
+    if (!confirm("ERROR while encrypting following properties, continue?\n" + errnames)) {
       return;
     }
   }
@@ -481,7 +481,9 @@ function onPostFailed(err) {
 
 async function displayProperties() {
   var properties = await exportProperties();
-  $("#editor").val("## " + getName() + ".properties\n" + properties);
+  if (properties) {
+    $("#editor").val("## " + getName() + ".properties\n" + properties);
+  }
 }
 $("#display").click(displayProperties);
 
