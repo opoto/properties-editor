@@ -240,7 +240,6 @@ function addPropertiesHeader() {
   });
 
   var filteredClass = "filtered-out";
-  var checkedFilter = false;
   $("#namefilter, #valuefilter").keyup(function(e) {
     if ((e.keyCode >= 46) || (e.keyCode == 8) || (e.keyCode == 32)) {
       const namef = $("#namefilter").val().trim();
@@ -254,13 +253,10 @@ function addPropertiesHeader() {
         var op = shown ? "removeClass" : "addClass";
         $(row)[op](filteredClass);
         // workaround for browsers (= Safari) who do not collapse properly
-        if (!checkedFilter && !shown) { // test only once, only when hiding
-          if (row.offsetHeight > 0) {
-            checkedFilter = true;
-            $(row).removeClass(filteredClass);
-            filteredClass = "filtered-out2";
-            $(row).addClass(filteredClass);
-          }
+        if (!shown && (row.offsetHeight > 0)) { // hidden rows should be hidden!
+          $(row).removeClass(filteredClass);
+          filteredClass = "filtered-out2";
+          $(row).addClass(filteredClass);
         }
       });
     }
