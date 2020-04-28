@@ -126,6 +126,10 @@ button:active,
 tr.filtered-out {
   visibility: collapse;
 }
+tr.filtered-out2 {
+  visibility: collapse;
+  display:none;
+}
 
 #tprops td {
   vertical-align: top;

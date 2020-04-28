@@ -239,16 +239,29 @@ function addPropertiesHeader() {
     cb.change();
   });
 
+  var filteredClass = "filtered-out";
+  var checkedFilter = false;
   $("#namefilter, #valuefilter").keyup(function(e) {
     if ((e.keyCode >= 46) || (e.keyCode == 8) || (e.keyCode == 32)) {
       const namef = $("#namefilter").val().trim();
       const valf = $("#valuefilter").val().trim();
+
       $("#tprops tr").each(function (idx, row) {
         if (idx == 0) return; // skip header row
         var name = $(row).find("td.tdname").text();
         var value = $(row).find(".tdvalue input[type=text]").val().trimLeft();
-        var op = ((!namef || name.indexOf(namef) >= 0) && (!valf || value.indexOf(valf) >= 0)) ? "removeClass" : "addClass";
-        $(row)[op]("filtered-out");
+        const shown = ((!namef || name.indexOf(namef) >= 0) && (!valf || value.indexOf(valf) >= 0));
+        var op = shown ? "removeClass" : "addClass";
+        $(row)[op](filteredClass);
+        // workaround for browsers (= Safari) who do not collapse properly
+        if (!checkedFilter && !shown) { // test only once, only when hiding
+          if (row.offsetHeight > 0) {
+            checkedFilter = true;
+            $(row).removeClass(filteredClass);
+            filteredClass = "filtered-out2";
+            $(row).addClass(filteredClass);
+          }
+        }
       });
     }
   });
