@@ -69,8 +69,8 @@ async function encryptPValue(cleartxt) {
 
 function isSensitiveName(name) {
   var nameUC = name.toUpperCase();
-  return (nameUC.indexOf("KEY") > 0 || nameUC.indexOf("PASSWORD") > 0
-    || nameUC.indexOf("PWD") > 0 || nameUC.indexOf("SECRET") > 0);
+  return (nameUC.indexOf("KEY") >= 0 || nameUC.indexOf("PASSWORD") >= 0
+    || nameUC.indexOf("PWD") >= 0 || nameUC.indexOf("SECRET") >= 0);
 }
 
 /* ---------- Property file loading ------------ */
@@ -186,7 +186,7 @@ async function importProperties(properties, name) {
         val = val.trimRight();
       }
       if (vname) {
-        if (!await addProperty(vname, val, desc)) {
+        if (!await addProperty($("#tprops tr:last-child"), vname, val, desc)) {
           errnames += "  - " + vname + "\n";
         }
       }
@@ -211,14 +211,14 @@ async function importProperties(properties, name) {
 function addPropertiesHeader() {
   $("#tprops").append("<tr>"
     + "<td id='tdinclh'><input type='checkbox' checked/></td>"
-    + "<td id='tdnameh'><input id='namefilter' type='text'/></td>"
+    + "<td id='tdnameh'><input id='namefilter' type='text' placeholder='filter'/></td>"
     + "<td id='tdench'>"
     + "  <span id='encbuth' value='' title='Toggle encryption'>"
     + "    <i class='checkspan-checked icon encrypted'></i>"
     + "    <i class='checkspan-unchecked icon cleartext'></i>"
     + "  </span>"
     + "</td>"
-    + "<td id='tdvalueh'><input id='valuefilter' type='text'/></td>"
+    + "<td id='tdvalueh'><input id='valuefilter' type='text' placeholder='filter'/></td>"
     + "</tr>");
   var ench = $("#encbuth");
   setCheckspan(ench, function (isChecked, isDblClick) {
@@ -263,7 +263,7 @@ function addPropertiesHeader() {
   });
 }
 
-async function addProperty(name, value, desc) {
+async function addProperty(appendTo, name, value, desc) {
   var encbut,
    inputclass ="",
    isEncrypted = "unchecked",
@@ -288,13 +288,13 @@ async function addProperty(name, value, desc) {
   if (desc.length) {
     input += "<br/><span></span>";
   }
-  $("#tprops").append("<tr>"
+  appendTo.after("<tr>"
   + "<td class='tdincl'><input type='checkbox' checked/></td>"
   + "<td class='tdname'></td>"
   + "<td class='tdenc'>" + encbut + "</td>"
   + "<td class='tdvalue'>" + input + "</td>"
   + "</tr>");
-  var addedRow = $("#tprops tr:last-child");
+  var addedRow = appendTo.next();
   // use jquery to set values to avoid XSS
   addedRow.find("td.tdname").text(name);
   addedRow.find("td.tdname").attr("title",name);
@@ -307,6 +307,14 @@ async function addProperty(name, value, desc) {
   var inclcb = addedRow.find(".tdincl input[type=checkbox]");
   var input = addedRow.find("td.tdvalue input, td.tdenc input");
   var nameCell = addedRow.find("td.tdname");
+  // ------ Row listeners
+  addedRow.find(".tdname").click(function (event) {
+    var name = $(event.currentTarget).text();
+    name = prompt("Update property name:", name).trim();
+    if (name) {
+      $(event.currentTarget).text(name);
+    }
+  });
   addedRow.find(".tdincl input[type=checkbox]").change(function(event) {
     if (inclcb.is(":checked")) {
       nameCell.removeClass("disabled");
@@ -328,6 +336,21 @@ async function addProperty(name, value, desc) {
   return noerror;
 }
 
+async function insertNewProperty() {
+  // insert a new property line after last selected one
+  var name = prompt("Enter property name:").trim();
+  if (name) {
+    await addProperty($("#tprops .tdincl input[type = checkbox]:checked").last().parents("tr"), name, "", []);
+  }
+}
+
+function deleteSelectedProperties() {
+  // delete all selected properties
+  $("#tprops .tdincl input[type = checkbox]:checked").parents("tr").remove();
+}
+
+$("#add-row").click(insertNewProperty);
+$("#delete-rows").click(deleteSelectedProperties);
 $("#clear-form").click(clearProperties);
 $("#delete-form").click(deleteProperties);
 
@@ -469,12 +492,10 @@ function onPostDone(viewurl, rawurl) {
     event.target.setSelectionRange(0, 99999);
     /* Copy the text inside the text field */
     document.execCommand("copy");
-    output.find("#notcopied").hide()
-    output.find("#copied").show()
+    output.find("#notcopied, #copied").toggle();
     setTimeout(function () {
-      output.find("#notcopied").show()
-      output.find("#copied").hide()
-    }, 2000);
+      output.find("#notcopied, #copied").toggle();
+    }, 1000);
   });
   output.show();
 }
@@ -606,6 +627,28 @@ setCheckspan($("#viewpwd"), function(isChecked){
 });
 setCheckspan($("#password-options"));
 
+$("#copy-password").click(function(event) {
+  var copied = $("#copied-password");
+  var tohide = copied.next();
+  var pwd = $("#encrypt-password");
+  var type = pwd.attr("type");
+  pwd.attr("type", "text");
+  pwd[0].select();
+  /* Copy the text inside the text field */
+  document.execCommand("copy");
+  pwd.attr("type", type);
+
+  var width = tohide.width();
+  var height = tohide.height();
+  tohide.hide();
+  copied.width(width-6);
+  copied.height(height);
+  copied.css("display", "inline-block");
+  setTimeout(function() {
+    $("#copied-password, #copied-password+span").toggle();
+  }, 1000);
+});
+
 $("#generate-password").click(function(event){
   saveConfig();
   $("#encrypt-password").val(generatePassword(config.pwdSz, config.pwdNum,
@@ -628,36 +671,40 @@ function test() {
 ### Header
 
 # This is a URL
- test = https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=
+ test.url = https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=
 
     # ignored comment
 
-name=this is a dummy string aàçuù
+test.accents= string with accents éèùàçùñ¡
 
-   ! multiline comment sarting with !
- multiline  = line1   \\
+   ! Multiline comment sarting with !
+ test.multiline.value  = line1   \\
     line2 \\
 line3
 
 # ignored comment
 
-# this a \\
+# This a \\
   multiline \\
   comment with ':' assignment
-equation.1 : 9879=879
+test.multiline.comment : 9879=879
+
+test.xss=' onclick='alert("bomb")'
 
 # This a very secret password
 # Make sure it is encrypted
 my.password=ENC(100000#SHA-256#256#WWzNkh0nLsZXrbWHKeHTKA==#7Ra57/n/bkpV7xi92YdkFw==#DfeWKrYiemNhOMZ2uaRc7vCf0o96loddlJuTIBnZk0heHk5O)
 
-# so secret it's not even written here
+# Empty encrypted property:
+! tag a property to be encrypted, even if not providing a value
 my.key=ENC()
 
+# Uncomment to test decryption errors
 #bad.enc=ENC(kjhsdf)
 
-base64=zNkh0nLsZXrbWHKeHTKA==
-color=#987AD3
-dummy=' onclick='alert("bomb")'
+
+Base64=zNkh0nLsZXrbWHKeHTKA==
+Color=#987AD3
 
 `, "Sample");
 }

@@ -260,8 +260,14 @@ input[type="checkbox"]:checked {
 .checkspan-checked,
 .checkspan-unchecked,
 #generate-password,
+#copy-password,
 #pname-edit,
 #clear-editor,
 .encbut {
   cursor: pointer;
+}
+#copied-password {
+  padding: 2px 0;
+  margin: 0;
+  text-align: center;
 }
