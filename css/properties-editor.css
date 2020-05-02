@@ -271,3 +271,7 @@ input[type="checkbox"]:checked {
   margin: 0;
   text-align: center;
 }
+.title {
+  font-style: italic;
+  margin-right: 20px;
+}

@@ -58,12 +58,20 @@ function clearStatus() {
 
 /* ------------------- Encryption ----------------- */
 
+function getEcnryptionConfig() {
+  return {
+    iterations: config.encIterations,
+    keySize: config.encKeySize,
+    algorithm: config.encAlgorithm
+  }
+}
+
  async function decryptPValue(ciphered) {
   const decrypted = await aesGcmDecrypt(ciphered, getEncryptPassword());
   return decrypted;
 }
 async function encryptPValue(cleartxt) {
-  const encrypted = await aesGcmEncrypt(cleartxt, getEncryptPassword());
+  const encrypted = await aesGcmEncrypt(cleartxt, getEncryptPassword(), getEcnryptionConfig());
   return encrypted.encoded;
 }
 
@@ -538,7 +546,10 @@ var DEFAULT_CONFIG = {
   fetchAuth: false,
   postUrl: "https://www.friendpaste.com",
   postAuth: false,
-  debug: false
+  debug: false,
+  encIterations: 100000,
+  encKeySize: 256,
+  encAlgorithm: "SHA-1"
 }
 var CONFIG_ITEM = "properties-editor.config";
 
@@ -555,6 +566,10 @@ function saveConfig() {
   config.pwdNum = $("#pwd-num").is(":checked");
   config.pwdAlpha = $("#pwd-alpha").is(":checked");
   config.pwdSym = $("#pwd-sym").is(":checked");
+
+  config.encIterations = $("#enc-iter").children("option:selected").val();
+  config.encAlgorithm = $("#enc-algo").children("option:selected").val();
+  config.encKeySize = $("#enc-key-size").children("option:selected").val();
 
   config.postUrl = $("#post-url").val().trim();
   config.postAuth = $("#post-auth").is(":checked");
@@ -575,6 +590,10 @@ function applyConfig() {
   $("#pwd-num").prop("checked", config.pwdNum);
   $("#pwd-alpha").prop("checked", config.pwdAlpha);
   $("#pwd-sym").prop("checked", config.pwdSym);
+
+  $("#enc-iter").val(config.encIterations);
+  $("#enc-algo").val(config.encAlgorithm);
+  $("#enc-key-size").val(config.encKeySize);
 
   $("#post-url").val(config.postUrl)
   $("#post-auth").prop("checked", config.postAuth);
@@ -625,7 +644,7 @@ setCheckspan($("#viewpwd"), function(isChecked){
   var type = isChecked ? "text" : "password";
   $("#encrypt-password").attr("type", type);
 });
-setCheckspan($("#password-options"));
+setCheckspan($("#encrypt-options"));
 
 $("#copy-password").click(function(event) {
   var copied = $("#copied-password");
@@ -691,7 +710,7 @@ test.multiline.comment : 9879=879
 
 test.xss=' onclick='alert("bomb")'
 
-# This a very secret password
+# This a very secret password: ThisIsMyPassWord1234
 # Make sure it is encrypted
 my.password=ENC(100000#SHA-256#256#WWzNkh0nLsZXrbWHKeHTKA==#7Ra57/n/bkpV7xi92YdkFw==#DfeWKrYiemNhOMZ2uaRc7vCf0o96loddlJuTIBnZk0heHk5O)
 
