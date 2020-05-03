@@ -62,16 +62,33 @@ function getEcnryptionConfig() {
   return {
     iterations: config.encIterations,
     keySize: config.encKeySize,
-    algorithm: config.encAlgorithm
+    algorithm: config.encAlgorithm,
+    key: cachedkey.key,
+    keyparams: cachedkey.keyparams
+
   }
 }
 
  async function decryptPValue(ciphered) {
   const decrypted = await aesGcmDecrypt(ciphered, getEncryptPassword());
-  return decrypted;
+  if (decrypted) {
+    cachedkey = {
+      key: decrypted.config.key,
+      keyparams: decrypted.config.keyparams
+    }
+    return decrypted.decoded;
+  } else {
+    return "";
+  }
 }
 async function encryptPValue(cleartxt) {
   const encrypted = await aesGcmEncrypt(cleartxt, getEncryptPassword(), getEcnryptionConfig());
+  if (encrypted.config) {
+    cachedkey = {
+      key: encrypted.config.key,
+      keyparams: encrypted.config.keyparams
+    }
+  }
   return encrypted.encoded;
 }
 
@@ -365,6 +382,7 @@ $("#delete-form").click(deleteProperties);
 /* ---------- Property file data collection ------------ */
 
 async function exportProperties() {
+  saveConfig();
   var riskynames = "";
   var errnames = "";
   var properties = "";
@@ -443,7 +461,6 @@ function download(filename, text) {
 }
 
 $("#save").click(async function () {
-  saveConfig();
   const properties = exportProperties();
   if (properties && !config.nosave) {
     download(getName() + ".properties", properties);
@@ -556,6 +573,8 @@ var CONFIG_ITEM = "properties-editor.config";
 var config = JSON.parse(localStorage.getItem(CONFIG_ITEM)) || DEFAULT_CONFIG;
 
 function saveConfig() {
+  cachedkey = {};
+
   config.fetchUrl = $("#fetch-url").val().trim();
   config.fetchAuth = $("#fetch-auth").is(":checked");
   config.fetchUser = $("#fetch-user").val().trim();

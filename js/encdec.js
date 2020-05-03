@@ -81,7 +81,7 @@ function isEncodedEncrypted(value) {
   * @param   {String} password - Password to use to encrypt plaintext.
   * @param   {Object} { iterations, algorithm, keySize }
   *
-  * @returns {Object}  { salt, iv, ciphertext }
+  * @returns {Object}  { config, iv, ciphertext, encoded }
   **/
 const aesGcmEncrypt = async (plaintext, password, config) => {
 
@@ -92,22 +92,25 @@ const aesGcmEncrypt = async (plaintext, password, config) => {
   config.iterations = config["iterations"] || 100000;
   config.algorithm = config["algorithm"] || "SHA-256";
   config.keySize = config["keySize"] || 256;
-  config.salt = genRandomBuffer(16);
 
-  const key = await getPbkdf2Key(password, config);
-  const iv = genRandomBuffer();
+  if (!config.key) {
+    config.salt = genRandomBuffer(16);
+    config.key = await getPbkdf2Key(password, config);
+    config.keyparams= config.iterations + "#"
+    + config.algorithm + "#"
+    + config.keySize + "#"
+    + bufferToBase64(config.salt);
+  }
+  const iv = genRandomBuffer(12);
 
   // encode plaintext as UTF-8
   const ptUint8 = new TextEncoder().encode(plaintext);
 
   // encrypt plaintext using key
-  const ciphered = await crypto.subtle.encrypt({name: 'AES-GCM', iv: iv }, key, ptUint8);
+  const ciphered = await crypto.subtle.encrypt({name: 'AES-GCM', iv: iv }, config.key, ptUint8);
 
   const encoded = ENCRYPTED_KEYWORD + "("
-   + config.iterations + "#"
-   + config.algorithm + "#"
-   + config.keySize + "#"
-   + bufferToBase64(config.salt) + "#"
+   + config.keyparams + "#"
    + bufferToBase64(iv) + "#"
    + bufferToBase64(ciphered) + ")";
 
@@ -136,40 +139,53 @@ const aesGcmEncrypt = async (plaintext, password, config) => {
 const aesGcmDecrypt = async (b64ciphertext, password, config) => {
 
   if (b64ciphertext.startsWith(ENCRYPTED_KEYWORD + "(")) {
-    if (config) {
-      throw new Exception("Both config and encoded mode");
-    }
     if (b64ciphertext.endsWith(")") && b64ciphertext.length == 5) {
-      return "";
+      return;
     }
     config = {};
-    // iterations
-    var sep = b64ciphertext.indexOf("#");
-    config.iterations = parseInt(b64ciphertext.substring(4, sep));
-    // algorithm
-    b64ciphertext = b64ciphertext.substring(sep+1);
-    sep = b64ciphertext.indexOf("#");
-    config.algorithm = b64ciphertext.substring(0, sep);
-    // keySize
-    b64ciphertext = b64ciphertext.substring(sep+1);
-    sep = b64ciphertext.indexOf("#");
-    config.keySize = parseInt(b64ciphertext.substring(0, sep));
-    // salt
-    b64ciphertext = b64ciphertext.substring(sep+1);
-    sep = b64ciphertext.indexOf("#");
-    config.salt = base64ToBuffer(b64ciphertext.substring(0, sep));
+
+    var encoded = b64ciphertext;
+    // cipher text
+    sep = encoded.lastIndexOf("#");
+    b64ciphertext = encoded.substring(sep+1, encoded.length-1);
+    encoded = encoded.substring(0, sep);
     // iv
-    b64ciphertext = b64ciphertext.substring(sep+1);
-    sep = b64ciphertext.indexOf("#");
-    config.iv = base64ToBuffer(b64ciphertext.substring(0, sep));
-    // keep only cipher text
-    b64ciphertext = b64ciphertext.substring(sep+1, b64ciphertext.length-1);
+    sep = encoded.lastIndexOf("#");
+    config.iv = base64ToBuffer(encoded.substring(sep+1));
+    encoded = encoded.substring(0, sep);
+
+    // cached key?
+    if (!config.key || (config.keyparams != encoded)) {
+      config.keyparams = encoded.substring(4);
+
+      // salt
+      sep = encoded.lastIndexOf("#");
+      config.salt = base64ToBuffer(encoded.substring(sep+1));
+      encoded = encoded.substring(0, sep);
+
+      // keySize
+      sep = encoded.lastIndexOf("#");
+      config.keySize = parseInt(encoded.substring(sep+1));
+      encoded = encoded.substring(0, sep);
+
+      // algorithm
+      sep = encoded.lastIndexOf("#");
+      config.algorithm = encoded.substring(sep+1);
+      encoded = encoded.substring(0, sep);
+
+      // iterations
+      config.iterations = parseInt(encoded.substring(4));
+
+      config.key = await getPbkdf2Key(password, config);
+    }
   }
-  const key = await getPbkdf2Key(password, config);
   const ctUint8 = base64ToBuffer(b64ciphertext);
   // decrypt ciphertext using key
-  const deciphered = await crypto.subtle.decrypt({name: 'AES-GCM', iv: config.iv }, key, ctUint8);
-  return new TextDecoder().decode(deciphered);
+  const deciphered = await crypto.subtle.decrypt({name: 'AES-GCM', iv: config.iv }, config.key, ctUint8);
+  return {
+    config: config,
+    decoded: new TextDecoder().decode(deciphered)
+  }
 }
 
 /**
