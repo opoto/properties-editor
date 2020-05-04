@@ -58,19 +58,9 @@ function clearStatus() {
 
 /* ------------------- Encryption ----------------- */
 
-function getEcnryptionConfig() {
-  return {
-    iterations: config.encIterations,
-    keySize: config.encKeySize,
-    algorithm: config.encAlgorithm,
-    key: cachedkey.key,
-    keyparams: cachedkey.keyparams
-
-  }
-}
-
  async function decryptPValue(ciphered) {
-  const decrypted = await aesGcmDecrypt(ciphered, getEncryptPassword());
+  cachedkey.debug = config.debug;
+  const decrypted = await aesGcmDecrypt(ciphered, getEncryptPassword(), cachedkey);
   if (decrypted) {
     cachedkey = {
       key: decrypted.config.key,
@@ -82,7 +72,14 @@ function getEcnryptionConfig() {
   }
 }
 async function encryptPValue(cleartxt) {
-  const encrypted = await aesGcmEncrypt(cleartxt, getEncryptPassword(), getEcnryptionConfig());
+  const encrypted = await aesGcmEncrypt(cleartxt, getEncryptPassword(), {
+    iterations: config.encIterations,
+    keySize: config.encKeySize,
+    algorithm: config.encAlgorithm,
+    key: cachedkey.key,
+    keyparams: cachedkey.keyparams,
+    debug: config.debug
+  });
   if (encrypted.config) {
     cachedkey = {
       key: encrypted.config.key,
@@ -148,6 +145,7 @@ $("#fetch").click(fetchFromURL);
 /* ---------- Parse editor -------------*/
 
 function parseProperties() {
+  saveConfig();
   var edited = $("#editor").val();
   importProperties(edited, getName());
 }
@@ -247,7 +245,6 @@ function addPropertiesHeader() {
     + "</tr>");
   var ench = $("#encbuth");
   setCheckspan(ench, function (isChecked, isDblClick) {
-    if (isDblClick) console.log("double");
     var isSelected = isCheckspanSelected(ench);
     $("#tprops tr").each(function(idx, row) {
       if (idx == 0) return; // skip header row
@@ -382,7 +379,6 @@ $("#delete-form").click(deleteProperties);
 /* ---------- Property file data collection ------------ */
 
 async function exportProperties() {
-  saveConfig();
   var riskynames = "";
   var errnames = "";
   var properties = "";
@@ -461,6 +457,7 @@ function download(filename, text) {
 }
 
 $("#save").click(async function () {
+  saveConfig();
   const properties = exportProperties();
   if (properties && !config.nosave) {
     download(getName() + ".properties", properties);
@@ -535,6 +532,7 @@ function onPostFailed(err) {
 /* ---------- Display -------------*/
 
 async function displayProperties() {
+  saveConfig();
   var properties = await exportProperties();
   if (properties) {
     $("#editor").val("## " + getName() + ".properties\n" + properties);
@@ -571,6 +569,7 @@ var DEFAULT_CONFIG = {
 var CONFIG_ITEM = "properties-editor.config";
 
 var config = JSON.parse(localStorage.getItem(CONFIG_ITEM)) || DEFAULT_CONFIG;
+var cachedkey = {};
 
 function saveConfig() {
   cachedkey = {};
@@ -731,7 +730,7 @@ test.xss=' onclick='alert("bomb")'
 
 # This a very secret password: ThisIsMyPassWord1234
 # Make sure it is encrypted
-my.password=ENC(100000#SHA-256#256#WWzNkh0nLsZXrbWHKeHTKA==#7Ra57/n/bkpV7xi92YdkFw==#DfeWKrYiemNhOMZ2uaRc7vCf0o96loddlJuTIBnZk0heHk5O)
+my.password=ENC(100000#SHA-1#256#xRtal2iSRIhSN1X83ZViVA==#AVl3VbtqNE0Yp2rb#/TPJI1ipMdzs4xZzVmcWBm8j8SBctlalc/RrCQaiRY4xmMJr)
 
 # Empty encrypted property:
 ! tag a property to be encrypted, even if not providing a value
@@ -739,7 +738,7 @@ my.key=ENC()
 
 # Uncomment to test decryption errors
 #bad.enc=ENC(kjhsdf)
-
+key.pub=ENC(100000#SHA-1#256#xRtal2iSRIhSN1X83ZViVA==#J3papw2BPAHJefGR#T685VE6BEKnGxD3UbzDtAOykFYN4lQSNzCzV73hGCBOB9CWii2fx1zcvjDK/Mm1RhwY6lnYbWdN0dIDM30zYbYjV4VkyQPuf8cBDb3jIVoq3R8lR5rvHCFyfu1IolC3xWCEJ81bY7bjvfJtciukB8ufiH+NNjSKqo9rxM3BfFRoHKOpnLXiihx1kQ7wrJk53hKWH680/fYCgoN53zY8z+n7sFoJhHZCxvGWmXeIE6pxxIdvzL9dmsyegl653HNYvI9kKu6F6fI5vyY5sAM5J8q3ywwwwxpyiZNzE9r6G1UqoV7KT/k29Bj6xXbiX6DkjS2yypUVfcqsGLcksuo+EPMLy4wIb1+idVsCp5F6GuOb5Ias+bGvtzwOGtzCOUsOGtenos+0DPlowqv7UIxptpTIDjC0PsRo00QKx4fxyEFFRI7OeAYU+t85axNbYFWwaNST+jZKOtgQXwDN3xvC32CAneqftkESPuTqqOh3SnpNzO6W/wxQY6MyCXSS7ILZYQMWNaMZcpL7cO8Po1AKr7Uu01q/AFrAEUje/WvhEp4Uve6ju2O3q3uc3H4YwOCnGj96iyNnP/jLjspeg52yFvvJ4mgdUemyG6bMX0Zw0+nsW+B1HJWvQ29NTggyArl/sIMo35aQVjuE8Yof2H5Xo/59a7o1W5/uuBFzMkYudDGrZOiynQ/BXVm1d3mrdx+0yW64=)
 
 Base64=zNkh0nLsZXrbWHKeHTKA==
 Color=#987AD3
