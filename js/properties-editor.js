@@ -458,7 +458,7 @@ function download(filename, text) {
 
 $("#save").click(async function () {
   saveConfig();
-  const properties = exportProperties();
+  const properties = await exportProperties();
   if (properties && !config.nosave) {
     download(getName() + ".properties", properties);
   }
