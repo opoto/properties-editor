@@ -158,6 +158,7 @@ function deleteProperties() {
   $("#pname").text("");
   $("#output").hide();
   $("#file").val("");
+  addPropertiesHeader();
 }
 
 function clearProperties() {
@@ -180,7 +181,6 @@ async function importProperties(properties, name) {
     $("#pname").text(name);
   }
   $("#editor").val(properties);
-  addPropertiesHeader();
   var desc = [],
     errnames = "";
   var lines = properties.split('\n');
@@ -362,7 +362,16 @@ async function insertNewProperty() {
   // insert a new property line after last selected one
   var name = prompt("Enter property name:").trim();
   if (name) {
-    await addProperty($("#tprops .tdincl input[type = checkbox]:checked").last().parents("tr"), name, "", []);
+    // search last selected property
+    var after = $("#tprops .tdincl input[type = checkbox]:checked").last();
+    if (after.length == 1) {
+      // found it, insert after this row
+      after = after.parents("tr");
+    } else {
+      // no row selected, insert after last row
+      var after = $("#tprops tr").last();
+    }
+    await addProperty(after, name, "", []);
   }
 }
 
