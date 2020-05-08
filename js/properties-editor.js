@@ -58,6 +58,13 @@ function clearStatus() {
 
 /* ------------------- Encryption ----------------- */
 
+function obf(str) {
+  return bufferToBase64(new TextEncoder().encode("A" + str));
+}
+function deobf(str) {
+  return new TextDecoder().decode(base64ToBuffer(str)).substring(1);
+}
+
  async function decryptPValue(ciphered) {
   cachedkey.debug = config.debug;
   const decrypted = await aesGcmDecrypt(ciphered, getEncryptPassword(), cachedkey);
@@ -146,8 +153,7 @@ $("#fetch").click(fetchFromURL);
 
 function parseProperties() {
   saveConfig();
-  var edited = $("#editor").val();
-  importProperties(edited, getName());
+  importProperties(config.editor, getName());
 }
 $("#parse").click(parseProperties);
 
@@ -551,6 +557,7 @@ $("#display").click(displayProperties);
 
 $("#clear-editor").click(function() {
   $("#editor").val("");
+  saveConfig();
 });
 
 setCheckspan($("#vieweditor"), function (isChecked) {
@@ -560,8 +567,50 @@ setCheckspan($("#vieweditor"), function (isChecked) {
 
 /* ---------- Config -------------*/
 
+var SAMPLE_NAME = "Sample";
+var SAMPLE_EDITOR = `
+### Header
+
+# This is a URL
+ test.url = https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=
+
+    # ignored comment
+
+test.accents= string with accents éèùàçùñ¡
+
+   ! Multiline comment sarting with !
+ test.multiline.value  = line1   \\
+    line2 \\
+line3
+
+# ignored comment
+
+# This a \\
+  multiline \\
+  comment with ':' assignment
+test.multiline.comment : 9879=879
+
+test.xss=' onclick='alert("bomb")'
+
+# This a very secret password: ThisIsMyPassWord1234
+# Make sure it is encrypted
+my.password=ENC(100000#SHA-1#256#xRtal2iSRIhSN1X83ZViVA==#AVl3VbtqNE0Yp2rb#/TPJI1ipMdzs4xZzVmcWBm8j8SBctlalc/RrCQaiRY4xmMJr)
+
+# Empty encrypted property:
+! tag a property to be encrypted, even if not providing a value
+my.key=ENC()
+
+# Uncomment to test decryption errors
+#bad.enc=ENC(kjhsdf)
+key.pub=ENC(100000#SHA-1#256#xRtal2iSRIhSN1X83ZViVA==#J3papw2BPAHJefGR#T685VE6BEKnGxD3UbzDtAOykFYN4lQSNzCzV73hGCBOB9CWii2fx1zcvjDK/Mm1RhwY6lnYbWdN0dIDM30zYbYjV4VkyQPuf8cBDb3jIVoq3R8lR5rvHCFyfu1IolC3xWCEJ81bY7bjvfJtciukB8ufiH+NNjSKqo9rxM3BfFRoHKOpnLXiihx1kQ7wrJk53hKWH680/fYCgoN53zY8z+n7sFoJhHZCxvGWmXeIE6pxxIdvzL9dmsyegl653HNYvI9kKu6F6fI5vyY5sAM5J8q3ywwwwxpyiZNzE9r6G1UqoV7KT/k29Bj6xXbiX6DkjS2yypUVfcqsGLcksuo+EPMLy4wIb1+idVsCp5F6GuOb5Ias+bGvtzwOGtzCOUsOGtenos+0DPlowqv7UIxptpTIDjC0PsRo00QKx4fxyEFFRI7OeAYU+t85axNbYFWwaNST+jZKOtgQXwDN3xvC32CAneqftkESPuTqqOh3SnpNzO6W/wxQY6MyCXSS7ILZYQMWNaMZcpL7cO8Po1AKr7Uu01q/AFrAEUje/WvhEp4Uve6ju2O3q3uc3H4YwOCnGj96iyNnP/jLjspeg52yFvvJ4mgdUemyG6bMX0Zw0+nsW+B1HJWvQ29NTggyArl/sIMo35aQVjuE8Yof2H5Xo/59a7o1W5/uuBFzMkYudDGrZOiynQ/BXVm1d3mrdx+0yW64=)
+
+Base64=zNkh0nLsZXrbWHKeHTKA==
+Color=#987AD3
+
+`;
+
 var DEFAULT_CONFIG = {
-  encrypt: false,
+  obfpassw: obf("p4ssw0rd"),
   pwdSz: "12",
   pwdNum: true,
   pwdAlpha: true,
@@ -573,15 +622,19 @@ var DEFAULT_CONFIG = {
   debug: false,
   encIterations: 100000,
   encKeySize: 256,
-  encAlgorithm: "SHA-1"
+  encAlgorithm: "SHA-1",
+  name: SAMPLE_NAME,
+  editor: SAMPLE_EDITOR
 }
 var CONFIG_ITEM = "properties-editor.config";
 
-var config = JSON.parse(localStorage.getItem(CONFIG_ITEM)) || DEFAULT_CONFIG;
+var config = JSON.parse(localStorage.getItem(CONFIG_ITEM)) || Object.assign({}, DEFAULT_CONFIG);
 var cachedkey = {};
 
 function saveConfig() {
   cachedkey = {};
+
+  config.obfpassw = obf(getEncryptPassword());
 
   config.fetchUrl = $("#fetch-url").val().trim();
   config.fetchAuth = $("#fetch-auth").is(":checked");
@@ -602,10 +655,16 @@ function saveConfig() {
   config.postAuth = $("#post-auth").is(":checked");
   config.postUser = $("#post-user").val().trim();
 
+  config.editor = $("#editor").val();
+  config.name = $("#pname").val();
+
   localStorage.setItem(CONFIG_ITEM, JSON.stringify(config))
 }
 
 function applyConfig() {
+
+  setEncryptPassword(deobf(config.obfpassw));
+
   $("#fetch-url").val(config.fetchUrl);
   $("#fetch-auth").prop("checked", config.fetchAuth);
   config.fetchAuth && $(".toggle-fetch-auth").show();
@@ -626,6 +685,10 @@ function applyConfig() {
   $("#post-auth").prop("checked", config.postAuth);
   config.postAuth && $(".toggle-post-auth").show();
   $("#post-user").val(config.postUser);
+
+  $("#editor").val(config.editor);
+  $("#pname").val(config.name);
+
 }
 
 function getFetchPassword() {
@@ -637,13 +700,14 @@ function getPostPassword() {
 function getEncryptPassword() {
   return $("#encrypt-password").val().trim();
 }
+function setEncryptPassword(pwd) {
+  $("#encrypt-password").val(pwd);
+}
 
-$("#resetCfg").click(function() {
-  config = DEFAULT_CONFIG;
+$("#resetCfg").click(async function() {
+  config = Object.assign({}, DEFAULT_CONFIG);;
   applyConfig();
-  // reload?
-  $("input[type=password]").val("");
-  $("input[type=checkbox]").change();
+  await importProperties(config.editor, config.name);
   saveConfig();
 });
 
@@ -704,55 +768,9 @@ $("#generate-password").click(function(event){
 $(window).on("load", function() {
 
   applyConfig();
+  importProperties(config.editor, config.name);
 
   $(window).on("unload", function() {
     saveConfig();
   });
 });
-
-/* ---------- Test -------------*/
-
-function test() {
-  importProperties(`
-### Header
-
-# This is a URL
- test.url = https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=
-
-    # ignored comment
-
-test.accents= string with accents éèùàçùñ¡
-
-   ! Multiline comment sarting with !
- test.multiline.value  = line1   \\
-    line2 \\
-line3
-
-# ignored comment
-
-# This a \\
-  multiline \\
-  comment with ':' assignment
-test.multiline.comment : 9879=879
-
-test.xss=' onclick='alert("bomb")'
-
-# This a very secret password: ThisIsMyPassWord1234
-# Make sure it is encrypted
-my.password=ENC(100000#SHA-1#256#xRtal2iSRIhSN1X83ZViVA==#AVl3VbtqNE0Yp2rb#/TPJI1ipMdzs4xZzVmcWBm8j8SBctlalc/RrCQaiRY4xmMJr)
-
-# Empty encrypted property:
-! tag a property to be encrypted, even if not providing a value
-my.key=ENC()
-
-# Uncomment to test decryption errors
-#bad.enc=ENC(kjhsdf)
-key.pub=ENC(100000#SHA-1#256#xRtal2iSRIhSN1X83ZViVA==#J3papw2BPAHJefGR#T685VE6BEKnGxD3UbzDtAOykFYN4lQSNzCzV73hGCBOB9CWii2fx1zcvjDK/Mm1RhwY6lnYbWdN0dIDM30zYbYjV4VkyQPuf8cBDb3jIVoq3R8lR5rvHCFyfu1IolC3xWCEJ81bY7bjvfJtciukB8ufiH+NNjSKqo9rxM3BfFRoHKOpnLXiihx1kQ7wrJk53hKWH680/fYCgoN53zY8z+n7sFoJhHZCxvGWmXeIE6pxxIdvzL9dmsyegl653HNYvI9kKu6F6fI5vyY5sAM5J8q3ywwwwxpyiZNzE9r6G1UqoV7KT/k29Bj6xXbiX6DkjS2yypUVfcqsGLcksuo+EPMLy4wIb1+idVsCp5F6GuOb5Ias+bGvtzwOGtzCOUsOGtenos+0DPlowqv7UIxptpTIDjC0PsRo00QKx4fxyEFFRI7OeAYU+t85axNbYFWwaNST+jZKOtgQXwDN3xvC32CAneqftkESPuTqqOh3SnpNzO6W/wxQY6MyCXSS7ILZYQMWNaMZcpL7cO8Po1AKr7Uu01q/AFrAEUje/WvhEp4Uve6ju2O3q3uc3H4YwOCnGj96iyNnP/jLjspeg52yFvvJ4mgdUemyG6bMX0Zw0+nsW+B1HJWvQ29NTggyArl/sIMo35aQVjuE8Yof2H5Xo/59a7o1W5/uuBFzMkYudDGrZOiynQ/BXVm1d3mrdx+0yW64=)
-
-Base64=zNkh0nLsZXrbWHKeHTKA==
-Color=#987AD3
-
-`, "Sample");
-}
-
-test();
