@@ -447,11 +447,9 @@ function getName() {
 }
 $("#pname-edit").click(function () {
   var oldname = $("#pname").text();
-  if (oldname) {
-    var newname = prompt("Change property file name:", oldname);
-    if (newname) {
-      $("#pname").text(newname);
-    }
+  var newname = prompt("Change property file name:", oldname);
+  if (newname) {
+    $("#pname").text(newname);
   }
 });
 
@@ -656,7 +654,7 @@ function saveConfig() {
   config.postUser = $("#post-user").val().trim();
 
   config.editor = $("#editor").val();
-  config.name = $("#pname").val();
+  config.name = $("#pname").text();
 
   localStorage.setItem(CONFIG_ITEM, JSON.stringify(config))
 }
@@ -687,7 +685,7 @@ function applyConfig() {
   $("#post-user").val(config.postUser);
 
   $("#editor").val(config.editor);
-  $("#pname").val(config.name);
+  $("#pname").text(config.name);
 
 }
 
