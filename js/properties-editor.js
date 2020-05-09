@@ -1,3 +1,22 @@
+/* ---------- Privacy Notice ------------ */
+
+function privacyNotice() {
+  var now = new Date();
+  var EXPIRATION = Math.round(1000*60*60*24*30.5*12); // 12 months in ms
+  if ((!config.privacyNotice) || (now.getTime() > new Date(config.privacyNotice).getTime() + EXPIRATION)) {
+    $('body').prepend("\
+    <div id='privacy-notice' style='display: none;'>\
+      <button id='privacy-notice-close'>Got it!</button>\
+      <div>This website uses cookies and browser's local storage to enhance your visit experience. \
+      <a href='https://github.com/opoto/properties-editor/blob/master/README.md' id='privacy-notice-more'>Read more</a></div>\
+    </div>");
+    $("#privacy-notice").show();
+    $("#privacy-notice-close").click(function() {
+      $("#privacy-notice").hide();
+      config.privacyNotice = now.toISOString();
+    });
+  }
+}
 
 /* ---------- Toggle options ------------ */
 function toggle(event){
@@ -609,11 +628,12 @@ Color=#987AD3
 
 var DEFAULT_CONFIG = {
   obfpassw: obf("p4ssw0rd"),
+  forgetme: false,
+  vtrimr: false,
   pwdSz: "12",
   pwdNum: true,
   pwdAlpha: true,
   pwdSym: true,
-  vtrimr: false,
   fetchAuth: false,
   postUrl: "https://www.friendpaste.com",
   postAuth: false,
@@ -622,11 +642,16 @@ var DEFAULT_CONFIG = {
   encKeySize: 256,
   encAlgorithm: "SHA-1",
   name: SAMPLE_NAME,
-  editor: SAMPLE_EDITOR
+  editor: SAMPLE_EDITOR,
+  viewEditor: true
 }
 var CONFIG_ITEM = "properties-editor.config";
 
-var config = JSON.parse(localStorage.getItem(CONFIG_ITEM)) || Object.assign({}, DEFAULT_CONFIG);
+var config = JSON.parse(localStorage.getItem(CONFIG_ITEM));
+if (config.forgetme) {
+  config = Object.assign({}, DEFAULT_CONFIG);
+  config.forgetme = true;
+}
 var cachedkey = {};
 
 function saveConfig() {
@@ -634,16 +659,17 @@ function saveConfig() {
 
   config.obfpassw = obf(getEncryptPassword());
 
-  config.fetchUrl = $("#fetch-url").val().trim();
-  config.fetchAuth = $("#fetch-auth").is(":checked");
-  config.fetchUser = $("#fetch-user").val().trim();
-
+  config.forgetme = $("#forgetme").is(":checked");
   config.vtrimr = $("#vtrimr").is(":checked");
 
   config.pwdSz = $("#pwd-sz").children("option:selected").val();
   config.pwdNum = $("#pwd-num").is(":checked");
   config.pwdAlpha = $("#pwd-alpha").is(":checked");
   config.pwdSym = $("#pwd-sym").is(":checked");
+
+  config.fetchUrl = $("#fetch-url").val().trim();
+  config.fetchAuth = $("#fetch-auth").is(":checked");
+  config.fetchUser = $("#fetch-user").val().trim();
 
   config.encIterations = $("#enc-iter").children("option:selected").val();
   config.encAlgorithm = $("#enc-algo").children("option:selected").val();
@@ -654,20 +680,25 @@ function saveConfig() {
   config.postUser = $("#post-user").val().trim();
 
   config.editor = $("#editor").val();
+  config.viewEditor = isCheckspanSelected($("#vieweditor"));
+
   config.name = $("#pname").text();
 
-  localStorage.setItem(CONFIG_ITEM, JSON.stringify(config))
+  if (config.forgetme) {
+    localStorage.setItem(CONFIG_ITEM, JSON.stringify({
+      forgetme: true,
+      privacyNotice : config.privacyNotice
+    }));
+  } else {
+    localStorage.setItem(CONFIG_ITEM, JSON.stringify(config));
+  }
 }
 
 function applyConfig() {
 
   setEncryptPassword(deobf(config.obfpassw));
 
-  $("#fetch-url").val(config.fetchUrl);
-  $("#fetch-auth").prop("checked", config.fetchAuth);
-  config.fetchAuth && $(".toggle-fetch-auth").show();
-  $("#fetch-user").val(config.fetchUser);
-
+  $("#forgetme").prop("checked", config.forgetme);
   $("#vtrimr").prop("checked", config.vtrimr);
 
   $("#pwd-sz").val(config.pwdSz);
@@ -679,12 +710,18 @@ function applyConfig() {
   $("#enc-algo").val(config.encAlgorithm);
   $("#enc-key-size").val(config.encKeySize);
 
+  $("#fetch-url").val(config.fetchUrl);
+  $("#fetch-auth").prop("checked", config.fetchAuth);
+  config.fetchAuth && $(".toggle-fetch-auth").show();
+  $("#fetch-user").val(config.fetchUser);
+
   $("#post-url").val(config.postUrl)
   $("#post-auth").prop("checked", config.postAuth);
   config.postAuth && $(".toggle-post-auth").show();
   $("#post-user").val(config.postUser);
 
   $("#editor").val(config.editor);
+  setCheckspanSelected($("#vieweditor"), config.viewEditor);
   $("#pname").text(config.name);
 
 }
@@ -703,9 +740,11 @@ function setEncryptPassword(pwd) {
 }
 
 $("#resetCfg").click(async function() {
-  config = Object.assign({}, DEFAULT_CONFIG);;
+  var privacyNotice = config.privacyNotice;
+  config = Object.assign({}, DEFAULT_CONFIG);
   applyConfig();
   await importProperties(config.editor, config.name);
+  config.privacyNotice = privacyNotice;
   saveConfig();
 });
 
@@ -767,6 +806,7 @@ $(window).on("load", function() {
 
   applyConfig();
   importProperties(config.editor, config.name);
+  privacyNotice();
 
   $(window).on("unload", function() {
     saveConfig();

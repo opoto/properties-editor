@@ -18,73 +18,90 @@
   </script>
 </head>
 <body>
-  <h1>Properties Editor <i class="icon icon-shield"></i></h1>
+  <h1>
+    Properties Editor <i class="icon icon-shield"></i>
+    <span id="about">
+      <a href="https://github.com/opoto/properties-editor/blob/master/README.md">
+        <i class="icon icon-info-circled"></i>
+      </a>
+    </span>
+  </h1>
   <h2>Settings</h2>
   <table id="tload" class="taction">
     <tr>
       <td>Options</td>
       <td>
-        <button id="resetCfg">Reset Settings</button>
+        <button id="resetCfg" title="Restore default settings and properties">Reset All</button>
+        <label title="If unchecked properties and settings are stored in localStorage to restore state on next reload">
+          Don't save state in browser
+          <input id="forgetme" type="checkbox"/>
+        </label>
         <label>Trim values right? <input id="vtrimr" type="checkbox"/></label>
       </td>
     </tr>
     <tr>
-      <td><label>Encryption</label></td>
+      <td>Encryption</td>
       <td>
-        <label>Password:</label>
-        <span id="viewpwd" value="unchecked" title="Toggle password visibility">
-          <i class="checkspan-unchecked icon icon-eye"></i>
-          <i class="checkspan-checked icon icon-eye-off"></i>
-        </span>
-        <label id="copied-password" class="hidden">Copied!</label>
-        <span>
-          <input id="encrypt-password" type="password" value="p4ssw0rd"/>
-          <i id="copy-password" class="icon icon-clone" title="Copy password to clipboard"></i>
-        </span>
-        <i id="generate-password" class="icon icon-arrows-cw" title="Generate password"></i>
-        <span id="encrypt-options" value="unchecked" class="toggle" title="Settings">
-          <i class="checkspan-unchecked icon icon-cog"></i>
-          <i class="checkspan-checked icon icon-cancel"></i>
-        </span>
-        <span class="hidden toggle-encrypt-options">
-          <br/>
-          <label class="title">Password Generator:</label>
-          <label>Size:</label>
-          <select id="pwd-sz">
-            <option value="8">8</option>
-            <option value="10">10</option>
-            <option value="12">12</option>
-            <option value="14">14</option>
-            <option value="16">16</option>
-            <option value="18">18</option>
-            <option value="20">20</option>
-          </select>
+        <div>
+          <span>Password:</span>
+          <span id="viewpwd" value="unchecked" title="Toggle password visibility">
+            <i class="checkspan-unchecked icon icon-eye"></i>
+            <i class="checkspan-checked icon icon-eye-off"></i>
+          </span>
+          <span id="copied-password" class="hidden">Copied!</span>
+          <span>
+            <input id="encrypt-password" type="password" value="p4ssw0rd"/>
+            <i id="copy-password" class="icon icon-clone" title="Copy password to clipboard"></i>
+          </span>
+          <i id="generate-password" class="icon icon-arrows-cw" title="Generate password"></i>
+          <span id="encrypt-options" value="unchecked" class="toggle" title="Settings">
+            <i class="checkspan-unchecked icon icon-cog"></i>
+            <i class="checkspan-checked icon icon-cancel"></i>
+          </span>
+        </div>
+        <div class="hidden toggle-encrypt-options">
+          <span class="title">Password Generator:</span>
+          <label>Size:
+            <select id="pwd-sz">
+              <option value="8">8</option>
+              <option value="10">10</option>
+              <option value="12">12</option>
+              <option value="14">14</option>
+              <option value="16">16</option>
+              <option value="18">18</option>
+              <option value="20">20</option>
+            </select>
+          </label>
           <label><input type="checkbox" id="pwd-num"/> Numbers</label>
           <label><input type="checkbox" id="pwd-alpha"/> Alphabet</label>
           <label><input type="checkbox" id="pwd-sym"/> Symbols</label>
-          <br/>
-          <label class="title">Encryption options:</label>
-          <label>Iterations:</label>
-          <select id="enc-iter">
-            <option value="10">10</option>
-            <option value="100">100</option>
-            <option value="1000">1000</option>
-            <option value="10000">10000</option>
-            <option value="100000">100000</option>
-            <option value="1000000">1000000</option>
-            <option value="10000000">10000000</option>
-          </select>
-          <label>Hash algo:</label>
-          <select id="enc-algo">
-            <option value="SHA-1">SHA-1</option>
-            <option value="SHA-256">SHA-256</option>
-          </select>
-          <label>Key size:</label>
-          <select id="enc-key-size">
-            <option value="128">128</option>
-            <option value="256">256</option>
-          </select>
-        </span>
+        </div>
+        <div class="hidden toggle-encrypt-options">
+          <span class="title">Encryption options:</span>
+            <label>Iterations:
+              <select id="enc-iter">
+                <option value="10">10</option>
+                <option value="100">100</option>
+                <option value="1000">1000</option>
+                <option value="10000">10000</option>
+                <option value="100000">100000</option>
+                <option value="1000000">1000000</option>
+                <option value="10000000">10000000</option>
+              </select>
+            </label>
+            <label>Hash algo:
+              <select id="enc-algo">
+                <option value="SHA-1">SHA-1</option>
+                <option value="SHA-256">SHA-256</option>
+              </select>
+            </label>
+            <label>Key size:
+              <select id="enc-key-size">
+                <option value="128">128</option>
+                <option value="256">256</option>
+              </select>
+            </label>
+        </div>
       </td>
     </tr>
   </table>
@@ -98,7 +115,7 @@
             <input type="file" id="file" name="file" accept=".properties, .config, .cfg, .conf, .settings"/>
             <span>File</span>
           </label>
-          <label>&nbsp;or</label>
+          <span class="text">&nbsp;or</span>
           <button id="parse">Editor</button>
         </td>
       </tr>
@@ -108,8 +125,8 @@
           <input id="fetch-url" type="text" class="urlinput" placeholder="URL to get properties file"/> <button id="fetch">Fetch</button>
           <label>Authentication? <input type="checkbox" id="fetch-auth" class="toggle"/></label>
           <div class="hidden toggle-fetch-auth">
-            User: <input id="fetch-user" type="text"/>
-            Password <input id="fetch-password" type="password"/>
+            <label>User: <input id="fetch-user" type="text"/></label>
+            <label>Password: <input id="fetch-password" type="password"/></label>
           </div>
         </td>
       </tr>
@@ -141,7 +158,7 @@
         <td>To:</td>
         <td>
           <button id="save">File</button>
-          <label>or</label>
+          <span class="text">or</span>
           <button id="display">Editor</button>
         </td>
       </tr>
@@ -152,8 +169,8 @@
           <button id="post">Post</button>
           <label>Authentication? <input type="checkbox" id="post-auth" class="toggle"/></label>
           <div class="hidden toggle-post-auth">
-            User: <input id="post-user" type="text"/>
-            Password <input id="post-password" type="password"/>
+            <label>User: <input id="post-user" type="text"/></label>
+            <label>Password: <input id="post-password" type="password"/></label>
           </div>
         </td>
       </tr>

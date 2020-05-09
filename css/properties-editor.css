@@ -64,6 +64,14 @@ button:active,
   margin: 10px 0;
 }
 
+#about {
+  float: right;
+}
+#about a {
+  color: white;
+  text-decoration: none;
+}
+
 .fold {
   color: #1992ca;
 }
@@ -72,6 +80,16 @@ button:active,
   cursor: pointer;
 }
 
+.taction label {
+  border: 1px solid rgb(202, 204, 197);
+  padding: 5px;
+  margin: 0 5px;
+  background-color: rgb(240, 242, 235);
+  cursor: pointer;
+}
+.taction label input[type=checkbox] {
+  cursor: pointer;
+}
 .taction {
   border-collapse: collapse;
   background-color: rgb(224, 228, 216);
@@ -82,11 +100,17 @@ button:active,
   border: 2px solid white;
   padding: 10px;
 }
+.taction td div {
+  line-height: 2em;
+}
+.taction td span.text {
+  line-height: 1em;
+}
 .taction td:nth-child(1) {
   text-align: right;
   width:1%;
   white-space:nowrap;
-  padding-top: 13px;
+  padding-top: 16px;
 }
 .urlinput {
   width: 50%;
@@ -274,4 +298,32 @@ input[type="checkbox"]:checked {
 .title {
   font-style: italic;
   margin-right: 20px;
+}
+
+#privacy-notice {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: black;
+  color: white;
+  padding: 15px;
+  z-index: 20000;
+}
+#privacy-notice div {
+  padding: 10px 0;
+}
+#privacy-notice-close {
+  background: yellow;
+  color: black;
+  padding: 10px 20px;
+  width: 33%;
+  margin-left: 10px;
+  float: right;
+  max-width: 120px;
+  border: 0;
+}
+#privacy-notice-more {
+  text-decoration: none;
+  color: #1992ca;
 }
