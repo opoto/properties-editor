@@ -802,6 +802,7 @@ $("#generate-password").click(function(event){
       config.pwdAlpha, config.pwdSym));
 });
 
+// run when window loading is completed
 $(window).on("load", function() {
 
   applyConfig();

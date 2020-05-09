@@ -55,9 +55,9 @@ button:active,
   color: white;
 }
 #file {
-   opacity: 0;
-   position: absolute;
-   z-index: -1;
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
 }
 
 #settings-div {
