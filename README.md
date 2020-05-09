@@ -1,6 +1,6 @@
 # Properties Editor
 
-Online properties editor with optional encryption of properties values (using AES-GCM 256).
+Online properties file editor with optional encryption of sensitive properties values.
 
 # Overview
 
