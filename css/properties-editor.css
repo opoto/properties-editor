@@ -86,6 +86,7 @@ button:active,
   margin: 0 5px;
   background-color: rgb(240, 242, 235);
   cursor: pointer;
+  white-space: nowrap;
 }
 .taction label input[type=checkbox] {
   cursor: pointer;
@@ -326,4 +327,17 @@ input[type="checkbox"]:checked {
 #privacy-notice-more {
   text-decoration: none;
   color: #1992ca;
+}
+
+
+/* for 480px or less */
+@media screen and (max-width: 480px) {
+  h1 {
+    font-size: 24px;
+  }
+
+
+  h2 {
+    font-size: 18px;
+  }
 }

@@ -34,13 +34,15 @@
     <tr>
       <td>Options</td>
       <td>
-        <button id="resetCfg" title="Restore default settings and properties">Reset All</button>
-        <label
-          title="If unchecked properties and settings are stored in localStorage to restore state on next reload">
-          Don't save state in browser
-          <input id="forgetme" type="checkbox" />
-        </label>
-        <label>Trim values right? <input id="vtrimr" type="checkbox" /></label>
+        <div>
+          <button id="resetCfg" title="Restore default settings and properties">Reset All</button>
+          <label
+            title="If unchecked properties and settings are stored in localStorage to restore state on next reload">
+            Don't save state in browser
+            <input id="forgetme" type="checkbox" />
+          </label>
+          <label>Trim values right? <input id="vtrimr" type="checkbox" /></label>
+        </div>
       </td>
     </tr>
     <tr>
@@ -115,22 +117,26 @@
       <tr>
         <td>From:</td>
         <td>
-          <label id="file-label">
-            <input type="file" id="file" name="file"
-              accept=".properties, .config, .cfg, .conf, .settings" />
-            <span>File</span>
-          </label>
-          <span class="text">&nbsp;or</span>
-          <button id="parse">Editor</button>
+          <div>
+            <label id="file-label">
+              <input type="file" id="file" name="file"
+                accept=".properties, .config, .cfg, .conf, .settings" />
+              <span>File</span>
+            </label>
+            <span class="text">&nbsp;or</span>
+            <button id="parse">Editor</button>
+          </div>
         </td>
       </tr>
       <tr>
         <td>From Web:</td>
         <td>
-          <input id="fetch-url" type="text" class="urlinput"
-            placeholder="URL to get properties file" />
-          <button id="fetch">Fetch</button>
-          <label>Authentication? <input type="checkbox" id="fetch-auth" class="toggle" /></label>
+          <div>
+            <input id="fetch-url" type="text" class="urlinput"
+              placeholder="URL to get properties file" />
+            <button id="fetch">Fetch</button>
+            <label>Authentication? <input type="checkbox" id="fetch-auth" class="toggle" /></label>
+          </div>
           <div class="hidden toggle-fetch-auth">
             <label>User: <input id="fetch-user" type="text" /></label>
             <label>Password: <input id="fetch-password" type="password" /></label>
@@ -172,18 +178,22 @@
       <tr>
         <td>To:</td>
         <td>
-          <button id="save">File</button>
-          <span class="text">or</span>
-          <button id="display">Editor</button>
+          <div>
+            <button id="save">File</button>
+            <span class="text">or</span>
+            <button id="display">Editor</button>
+          </div>
         </td>
       </tr>
       <tr>
         <td>To Web:</td>
         <td>
-          <input id="post-url" type="text" class="urlinput" placeholder="Destination URL"
-            value="https://www.friendpaste.com/" />
-          <button id="post">Post</button>
-          <label>Authentication? <input type="checkbox" id="post-auth" class="toggle" /></label>
+          <div>
+            <input id="post-url" type="text" class="urlinput" placeholder="Destination URL"
+              value="https://www.friendpaste.com/" />
+            <button id="post">Post</button>
+            <label>Authentication? <input type="checkbox" id="post-auth" class="toggle" /></label>
+          </div>
           <div class="hidden toggle-post-auth">
             <label>User: <input id="post-user" type="text" /></label>
             <label>Password: <input id="post-password" type="password" /></label>

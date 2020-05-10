@@ -646,13 +646,24 @@ var DEFAULT_CONFIG = {
   viewEditor: true
 }
 var CONFIG_ITEM = "properties-editor.config";
-
-var config = JSON.parse(localStorage.getItem(CONFIG_ITEM));
-if (config.forgetme) {
-  config = Object.assign({}, DEFAULT_CONFIG);
-  config.forgetme = true;
-}
 var cachedkey = {};
+var config;
+
+function restoreConfig() {
+  config = JSON.parse(localStorage.getItem(CONFIG_ITEM));
+  var forgetme = false,
+      privacyNotice;
+  if (config) {
+    // keep at least this data
+    forgetme = config.forgetme;
+    privacyNotice = config.privacyNotice;
+  }
+  if (!config || forgetme) {
+    config = Object.assign({}, DEFAULT_CONFIG);
+    config.forgetme = forgetme;
+    config.privacyNotice = privacyNotice;
+  }
+}
 
 function saveConfig() {
   cachedkey = {};
@@ -805,6 +816,7 @@ $("#generate-password").click(function(event){
 // run when window loading is completed
 $(window).on("load", function() {
 
+  restoreConfig();
   applyConfig();
   importProperties(config.editor, config.name);
   privacyNotice();
