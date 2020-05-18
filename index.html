@@ -36,10 +36,13 @@
       <td>
         <div>
           <button id="resetCfg" title="Restore default settings and properties">Reset All</button>
-          <label
-            title="If unchecked properties and settings are stored in localStorage to restore state on next reload">
+          <label title="If unchecked properties and settings are stored in localStorage to restore state on next reload">
             Don't save state in browser
             <input id="forgetme" type="checkbox" />
+          </label>
+          <label title="If unchecked passwords for encryption and web authentication are stored obfuscated in localStorage to restore state on next reload">
+            Don't save passwords
+            <input id="forgetpwd" type="checkbox" />
           </label>
           <label>Trim values right? <input id="vtrimr" type="checkbox" /></label>
         </div>

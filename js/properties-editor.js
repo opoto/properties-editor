@@ -121,6 +121,14 @@ function isSensitiveName(name) {
     || nameUC.indexOf("PWD") >= 0 || nameUC.indexOf("SECRET") >= 0);
 }
 
+/* ---------- Saving Options ------------ */
+
+$("#forgetme").change(function() {
+  var forgetme = $("#forgetme").is(":checked");
+  if (forgetme) $("#forgetpwd").prop("checked", true);
+  $("#forgetpwd").prop("disabled", forgetme);
+});
+
 /* ---------- Property file loading ------------ */
 
 function handleFileSelect(event) {
@@ -180,7 +188,7 @@ $("#parse").click(parseProperties);
 
 function deleteProperties() {
   $("#tprops").empty();
-  $("#pname").text("");
+  $("#pname").text("TBD");
   $("#output").hide();
   $("#file").val("");
   addPropertiesHeader();
@@ -336,33 +344,35 @@ async function addProperty(appendTo, name, value, desc) {
     input += "<br/><span></span>";
   }
   appendTo.after("<tr>"
-  + "<td class='tdincl'><input type='checkbox' checked/></td>"
+  + "<td class='tdincl'><input class='incl' type='checkbox' checked/></td>"
   + "<td class='tdname'></td>"
   + "<td class='tdenc'>" + encbut + "</td>"
   + "<td class='tdvalue'>" + input + "</td>"
   + "</tr>");
   var addedRow = appendTo.next();
+  var tdName = addedRow.find("td.tdname");
+  var inclcb = addedRow.find(".incl");
+  var input = addedRow.find("td.tdvalue input");
+  var nameCell = addedRow.find("td.tdname");
   // use jquery to set values to avoid XSS
-  addedRow.find("td.tdname").text(name);
-  addedRow.find("td.tdname").attr("title",name);
-  addedRow.find("td.tdvalue input").val(value);
+  tdName.text(name);
+  tdName.attr("title",name);
+  input.val(value);
   var comments = addedRow.find("td.tdvalue span");
   desc.forEach( descLine => {
     comments.append($($.parseHTML("<div></div>")).text(descLine));
   });
 
-  var inclcb = addedRow.find(".tdincl input[type=checkbox]");
-  var input = addedRow.find("td.tdvalue input, td.tdenc input");
-  var nameCell = addedRow.find("td.tdname");
   // ------ Row listeners
-  addedRow.find(".tdname").click(function (event) {
-    var name = $(event.currentTarget).text();
-    name = prompt("Update property name:", name).trim();
+  tdName.click(function (event) {
+    var name = tdName.text();
+    name = promptPropertyName(name);
     if (name) {
-      $(event.currentTarget).text(name);
+      tdName.text(name);
+      tdName.attr("title", name);
     }
   });
-  addedRow.find(".tdincl input[type=checkbox]").change(function(event) {
+  inclcb.change(function(event) {
     if (inclcb.is(":checked")) {
       nameCell.removeClass("disabled");
       input.prop("readonly", false);
@@ -373,7 +383,7 @@ async function addProperty(appendTo, name, value, desc) {
       input.prop("disabled", true);
     }
   });
-  setCheckspan(addedRow.find(".tdenc .encbut"),function(isChecked) {
+  setCheckspan(addedRow.find(".encbut"),function(isChecked) {
     if (isChecked) {
       input.addClass("encrypted-val");
     } else {
@@ -383,9 +393,14 @@ async function addProperty(appendTo, name, value, desc) {
   return noerror;
 }
 
+function promptPropertyName(prevName) {
+  var name = prompt((prevName ? "Update" : "Enter") + " property name:", prevName);
+  return name ? name.trim() : undefined;
+}
+
 async function insertNewProperty() {
   // insert a new property line after last selected one
-  var name = prompt("Enter property name:").trim();
+  var name = promptPropertyName();
   if (name) {
     // search last selected property
     var after = $("#tprops .tdincl input[type = checkbox]:checked").last();
@@ -467,6 +482,7 @@ function getName() {
 $("#pname-edit").click(function () {
   var oldname = $("#pname").text();
   var newname = prompt("Change property file name:", oldname);
+  newname = newname ? newname.trim() : undefined;
   if (newname) {
     $("#pname").text(newname);
   }
@@ -529,6 +545,7 @@ $("#post").click(async function () {
   const properties = await exportProperties();
   if (properties) {
     if (config.nosave) {
+      // debug: simulate post done
       onPostDone(undefined, "https://friendpaste.com/2P0OaZhUfBH2mfWJzYkIZb/raw?rev=393530653965");
     } else {
       friendpasteUpload(getName(), properties, onPostDone, onPostFailed);
@@ -568,6 +585,7 @@ async function displayProperties() {
   var properties = await exportProperties();
   if (properties) {
     $("#editor").val("## " + getName() + ".properties\n" + properties);
+    saveConfig(); // to save editor area
   }
 }
 $("#display").click(displayProperties);
@@ -629,6 +647,7 @@ Color=#987AD3
 var DEFAULT_CONFIG = {
   obfpassw: obf("p4ssw0rd"),
   forgetme: false,
+  forgetpwd: true,
   vtrimr: false,
   pwdSz: "12",
   pwdNum: true,
@@ -668,10 +687,11 @@ function restoreConfig() {
 function saveConfig() {
   cachedkey = {};
 
-  config.obfpassw = obf(getEncryptPassword());
-
   config.forgetme = $("#forgetme").is(":checked");
+  config.forgetpwd = $("#forgetpwd").is(":checked");
   config.vtrimr = $("#vtrimr").is(":checked");
+
+  config.obfpassw = config.forgetpwd ? "" : obf(getEncryptPassword());
 
   config.pwdSz = $("#pwd-sz").children("option:selected").val();
   config.pwdNum = $("#pwd-num").is(":checked");
@@ -681,6 +701,7 @@ function saveConfig() {
   config.fetchUrl = $("#fetch-url").val().trim();
   config.fetchAuth = $("#fetch-auth").is(":checked");
   config.fetchUser = $("#fetch-user").val().trim();
+  config.obfFetchPassw = config.forgetpwd ? "" : obf($("#fetch-password").val().trim());
 
   config.encIterations = $("#enc-iter").children("option:selected").val();
   config.encAlgorithm = $("#enc-algo").children("option:selected").val();
@@ -689,6 +710,7 @@ function saveConfig() {
   config.postUrl = $("#post-url").val().trim();
   config.postAuth = $("#post-auth").is(":checked");
   config.postUser = $("#post-user").val().trim();
+  config.obfPostPassw = config.forgetpwd ? "" : obf($("#post-password").val().trim());
 
   config.editor = $("#editor").val();
   config.viewEditor = isCheckspanSelected($("#vieweditor"));
@@ -707,9 +729,11 @@ function saveConfig() {
 
 function applyConfig() {
 
-  setEncryptPassword(deobf(config.obfpassw));
+  if (config.obfpassw) setEncryptPassword(deobf(config.obfpassw));
 
   $("#forgetme").prop("checked", config.forgetme);
+  $("#forgetme").change();
+  $("#forgetpwd").prop("checked", config.forgetpwd);
   $("#vtrimr").prop("checked", config.vtrimr);
 
   $("#pwd-sz").val(config.pwdSz);
@@ -725,11 +749,13 @@ function applyConfig() {
   $("#fetch-auth").prop("checked", config.fetchAuth);
   config.fetchAuth && $(".toggle-fetch-auth").show();
   $("#fetch-user").val(config.fetchUser);
+  if (config.obfFetchPassw) $("#fetch-password").val(deobf(config.obfFetchPassw));
 
   $("#post-url").val(config.postUrl)
   $("#post-auth").prop("checked", config.postAuth);
   config.postAuth && $(".toggle-post-auth").show();
   $("#post-user").val(config.postUser);
+  if (config.obfPostPassw) $("#post-password").val(deobf(config.obfPostPassw));
 
   $("#editor").val(config.editor);
   setCheckspanSelected($("#vieweditor"), config.viewEditor);
@@ -822,6 +848,7 @@ $(window).on("load", function() {
   privacyNotice();
 
   $(window).on("unload", function() {
-    saveConfig();
+    // export to editor and save
+    displayProperties();
   });
 });
