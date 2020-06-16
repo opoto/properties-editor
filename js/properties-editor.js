@@ -839,12 +839,69 @@ $("#generate-password").click(function(event){
       config.pwdAlpha, config.pwdSym));
 });
 
+// Extract URL parameters from current location
+function getParameterByName(name) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(location.search);
+  return results === null ? undefined: decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+// Copy shareable link to clipboard
+$("#share-url").click(function() {
+
+  // avoid duplicate clicks
+  if ($("#share-url").attr("disabled")) return;
+  $("#share-url").attr("disabled", true);
+
+  saveConfig();
+
+  // build shareable link
+  var sharedUrl = window.location + "?url=" + encodeURIComponent(config.fetchUrl);
+  if (!config.forgetpwd) {
+    sharedUrl += "&pwd=" + encodeURIComponent(getEncryptPassword());
+  }
+
+  // set shareable link in input box
+  $("#fetch-url").val(sharedUrl);
+
+  // Copy the text inside the text field
+  $("#fetch-url").select();
+  document.execCommand("copy");
+  $("#fetch-url").val("URL copied to clipboard");
+  setTimeout(function () {
+    // restore input
+    $("#fetch-url").val(config.fetchUrl);
+    $("#share-url").attr("disabled", false);
+  }, 1000);
+
+});
+
 // run when window loading is completed
 $(window).on("load", function() {
 
   restoreConfig();
+
+  var pwd = getParameterByName("pwd");
+  if (pwd) {
+    config.obfpassw = obf(pwd);
+  }
+  var url = getParameterByName("url");
+  if (url) {
+    config.fetchUrl = url;
+  }
+  // reset URL if it contains query parameters
+  if (window.location.search && window.history && window.history.pushState) {
+    window.history.pushState({}, document.title, window.location.pathname);
+  }
+
   applyConfig();
-  importProperties(config.editor, config.name);
+  if (url) {
+    $("#fetch").click();
+    saveConfig();
+  } else {
+    importProperties(config.editor, config.name);
+  }
   privacyNotice();
 
   $(window).on("unload", function() {
