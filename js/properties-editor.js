@@ -154,7 +154,7 @@ $("#file").change(handleFileSelect);
 
 function fetchFromURL(event) {
   saveConfig();
-  var url = config.fetchURL;
+  var url = config.fetchUrl;
   if (!url) {
     return;
   }
@@ -167,8 +167,8 @@ function fetchFromURL(event) {
   .done(function (data) {
     importProperties(data, url.substring(url.lastIndexOf("/") + 1));
   })
-  .fail(function () {
-    setStatus("File loading failed: " + err, {
+  .fail(function (err) {
+    setStatus("File loading failed: " + err.statusText, {
       class: "status-error",
       timeout: 3
     });
