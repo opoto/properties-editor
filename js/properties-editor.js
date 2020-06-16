@@ -158,12 +158,16 @@ function fetchFromURL(event) {
   if (!url) {
     return;
   }
-  var getOptions = {};
+  var getOptions = {
+    xhrFields: {
+      withCredentials: true
+    }
+  };
   if (config.fetchAuth) {
     getOptions.username = config.fetchUser;
     getOptions.password = getFetchPassword();
   }
-  $.get(url, getOptions)
+  $.ajax(url, getOptions)
   .done(function (data) {
     importProperties(data, url.substring(url.lastIndexOf("/") + 1));
   })
@@ -518,6 +522,9 @@ function friendpasteUpload(name, data, onDone, onFail) {
   var postOptions = {
     method: "POST",
     url: config.postUrl,
+    xhrFields: {
+      withCredentials: true
+    },
     dataType: "json",
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({
