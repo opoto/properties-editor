@@ -194,14 +194,13 @@
         <td>
           <div>
             <input id="post-url" type="text" class="urlinput" placeholder="Destination URL"
-              value="https://www.friendpaste.com/" />
+              value="https://tmpfile.glitch.me" disabled="true" selectable="false"/>
             <button id="post">Post</button>
-            <label>Authentication? <input type="checkbox" id="post-auth" class="toggle" /></label>
+            <button id="post-reset">RESET</button>
           </div>
-          <div class="hidden toggle-post-auth">
-            <label>User: <input id="post-user" type="text" /></label>
-            <label>Password: <input id="post-password" type="password" /></label>
-          </div>
+          <span class="comment">
+            Don't share this link, this is your private admin URL to update or delete the file
+          </span>
         </td>
       </tr>
     </table>

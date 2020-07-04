@@ -518,34 +518,21 @@ $("#save").click(async function () {
 
 /* ---------- Property file posting ------------ */
 
-function friendpasteUpload(name, data, onDone, onFail) {
-  var postOptions = {
+function tmpfileUpload(name, file, onDone, onFail) {
+  $.ajax({
     method: "POST",
     url: config.postUrl,
-    xhrFields: {
-      withCredentials: true
-    },
-    dataType: "json",
-    contentType: "application/json; charset=utf-8",
-    data: JSON.stringify({
-      "title": name,
-      "snippet": data,
-      "password": "dummy",
-      "language": "text"
-    })
-  };
-  if (config.postAuth) {
-    postOptions.username = config.postUser;
-    postOptions.password = getPostPassword();
-  }
-  $.ajax(postOptions).done(function (resp) {
-    if (resp.ok) {
-      onDone(resp.url + "?rev=" + resp.rev, resp.url + "/raw?rev=" + resp.rev);
-    } else {
-      onFail(resp.reason);
-    }
+    data: file
+  }).done(function(resp) {
+    onDone(resp.urlAdmin, resp.url);
   }).fail(onFail);
 }
+
+$("#post-reset").click(function () {
+  saveConfig();
+  config.postUrl = DEFAULT_CONFIG.postUrl;
+  applyConfig();
+});
 
 $("#post").click(async function () {
   saveConfig();
@@ -555,12 +542,14 @@ $("#post").click(async function () {
       // debug: simulate post done
       onPostDone(undefined, "https://friendpaste.com/2P0OaZhUfBH2mfWJzYkIZb/raw?rev=393530653965");
     } else {
-      friendpasteUpload(getName(), properties, onPostDone, onPostFailed);
+      tmpfileUpload(getName(), properties, onPostDone, onPostFailed);
     }
   }
 });
 
-function onPostDone(viewurl, rawurl) {
+function onPostDone(adminUrl, rawurl) {
+  config.postUrl = adminUrl;
+  applyConfig();
   var output = $("#output");
   output.find("input").val(rawurl);
   output.find("img").attr("src", "https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=>" + encodeURIComponent(rawurl));
@@ -661,8 +650,7 @@ var DEFAULT_CONFIG = {
   pwdAlpha: true,
   pwdSym: true,
   fetchAuth: false,
-  postUrl: "https://www.friendpaste.com",
-  postAuth: false,
+  postUrl: "https://tmpfile.glitch.me",
   debug: false,
   encIterations: 100000,
   encKeySize: 256,
@@ -715,9 +703,6 @@ function saveConfig() {
   config.encKeySize = $("#enc-key-size").children("option:selected").val();
 
   config.postUrl = $("#post-url").val().trim();
-  config.postAuth = $("#post-auth").is(":checked");
-  config.postUser = $("#post-user").val().trim();
-  config.obfPostPassw = config.forgetpwd ? "" : obf($("#post-password").val().trim());
 
   config.editor = $("#editor").val();
   config.viewEditor = isCheckspanSelected($("#vieweditor"));
@@ -759,10 +744,6 @@ function applyConfig() {
   if (config.obfFetchPassw) $("#fetch-password").val(deobf(config.obfFetchPassw));
 
   $("#post-url").val(config.postUrl)
-  $("#post-auth").prop("checked", config.postAuth);
-  config.postAuth && $(".toggle-post-auth").show();
-  $("#post-user").val(config.postUser);
-  if (config.obfPostPassw) $("#post-password").val(deobf(config.obfPostPassw));
 
   $("#editor").val(config.editor);
   setCheckspanSelected($("#vieweditor"), config.viewEditor);

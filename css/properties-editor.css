@@ -50,6 +50,10 @@ input[type=password] {
   margin: 0;
   font-size: 13px;
 }
+#post-url {
+  pointer-events: none;
+}
+
 button:active,
 #file-label span:active {
   color: white;
@@ -177,7 +181,7 @@ tr.filtered-out2 {
 #tprops td.tdvalue {
   width: 100%;
 }
-#tprops td.tdvalue span {
+#tprops td.tdvalue span, .comment {
   color: grey;
   font-size: 80%;
   font-style: italic;
