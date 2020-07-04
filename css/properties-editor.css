@@ -50,8 +50,17 @@ input[type=password] {
   margin: 0;
   font-size: 13px;
 }
-#post-url {
-  pointer-events: none;
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+#post-delete {
+  color: red;
 }
 
 button:active,
@@ -181,7 +190,7 @@ tr.filtered-out2 {
 #tprops td.tdvalue {
   width: 100%;
 }
-#tprops td.tdvalue span, .comment {
+#tprops td.tdvalue span {
   color: grey;
   font-size: 80%;
   font-style: italic;

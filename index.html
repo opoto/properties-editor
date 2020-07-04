@@ -193,14 +193,12 @@
         <td>To Web:</td>
         <td>
           <div>
-            <input id="post-url" type="text" class="urlinput" placeholder="Destination URL"
-              value="https://tmpfile.glitch.me" disabled="true" selectable="false"/>
-            <button id="post">Post</button>
-            <button id="post-reset">RESET</button>
+            <input id="post-url" type="text" class="urlinput noselect" placeholder="Destination URL"
+              value="https://tmpfile.glitch.me" readonly="true"/>
+            <button id="post" title="Post file to a shared file storage">Post</button>
+            <button id="post-reset" title="Forget this URL and create a new one">Reset</button>
+            <button id="post-delete" title="Delete this URL on the shared file storage">Delete</button>
           </div>
-          <span class="comment">
-            Don't share this link, this is your private admin URL to update or delete the file
-          </span>
         </td>
       </tr>
     </table>

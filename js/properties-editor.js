@@ -518,9 +518,9 @@ $("#save").click(async function () {
 
 /* ---------- Property file posting ------------ */
 
-function tmpfileUpload(name, file, onDone, onFail) {
+function tmpfileUpload(file, deleteFile, onDone, onFail) {
   $.ajax({
-    method: "POST",
+    method: deleteFile ? "DELETE" : "POST",
     url: config.postUrl,
     data: file
   }).done(function(resp) {
@@ -534,6 +534,36 @@ $("#post-reset").click(function () {
   applyConfig();
 });
 
+$("#post-url").click(function () {
+  var url;
+  var minSz = DEFAULT_CONFIG.postUrl.length + 1; // +1 for potential trailing /
+  do {
+    url = prompt("Copy or paste the URL from a previous upload.\nWarning: Don't share this link, this is your private admin URL to update or delete the file.", config.postUrl);
+    url = url ? url.trim() : url;
+    var invalid = url // not empty
+      && ((url.indexOf(DEFAULT_CONFIG.postUrl) != 0) // must start with expected server url
+      || ((url.length > minSz) && (url.lastIndexOf(".") < minSz)));
+    if (invalid) {
+      alert("ERROR: the URL is not valid. It must match:\n"
+        + DEFAULT_CONFIG.postUrl + "/<public-id>.<admin-secret>");
+    }
+  } while (invalid);
+  if (url) {
+    config.postUrl = url;
+    applyConfig();
+  }
+});
+
+$("#post-delete").click(async function () {
+  if (!confirm("Permanently delete file on remote shared storage?")) return;
+  tmpfileUpload("", true, function() {
+    config.postUrl = DEFAULT_CONFIG.postUrl;
+    applyConfig();
+  }, function(err) {
+    alert(err);
+  });
+});
+
 $("#post").click(async function () {
   saveConfig();
   const properties = await exportProperties();
@@ -542,7 +572,7 @@ $("#post").click(async function () {
       // debug: simulate post done
       onPostDone(undefined, "https://friendpaste.com/2P0OaZhUfBH2mfWJzYkIZb/raw?rev=393530653965");
     } else {
-      tmpfileUpload(getName(), properties, onPostDone, onPostFailed);
+      tmpfileUpload(properties, false, onPostDone, onPostFailed);
     }
   }
 });
@@ -744,6 +774,9 @@ function applyConfig() {
   if (config.obfFetchPassw) $("#fetch-password").val(deobf(config.obfFetchPassw));
 
   $("#post-url").val(config.postUrl)
+  var showPostOptions = (config.postUrl.lastIndexOf("/") > 10);
+  $("#post-reset").toggle(showPostOptions);
+  $("#post-delete").toggle(showPostOptions);
 
   $("#editor").val(config.editor);
   setCheckspanSelected($("#vieweditor"), config.viewEditor);
