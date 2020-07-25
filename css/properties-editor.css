@@ -245,7 +245,7 @@ input[type="checkbox"]:checked {
   font-family: "fontello";
   font-style: normal;
   font-weight: normal;
-  speak: none;
+  /*speak: never; // Waiting for Speech Module adoption */
 
   display: inline-block;
   text-decoration: inherit;

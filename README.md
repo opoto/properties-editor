@@ -1,5 +1,6 @@
 # Properties Editor
 
+![Icon](https://raw.githubusercontent.com/opoto/properties-editor/master/img/icon.png)
 Online properties file editor with optional encryption of sensitive properties values.
 
 # Overview
