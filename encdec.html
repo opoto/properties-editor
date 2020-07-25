@@ -100,7 +100,7 @@ async function doDecrypt() {
   $("#dec").val("");
   try {
     plaintext = await aesGcmDecrypt(enc, pwd);
-    $("#dec").val(plaintext);
+    $("#dec").val(plaintext.decoded);
   } catch (err) {
     $("#log").append("<p>ERROR: " + err + "</p>");
   }
