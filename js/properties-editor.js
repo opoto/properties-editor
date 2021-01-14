@@ -223,7 +223,7 @@ async function importProperties(properties, name) {
   var lines = properties.split('\n');
   for (var i = 0; i < lines.length; i++) {
     // spaces at beggining of line are ignored
-    var line = lines[i].trimLeft();
+    var line = lines[i].trimLeft().replace(/[\n\r]*$/, "");
     while (line.endsWith("\\")) {
       line = line.substring(0, line.length - 1);
       if (i+1 < lines.length) {
