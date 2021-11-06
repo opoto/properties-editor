@@ -806,6 +806,14 @@ $("#resetCfg").click(async function() {
   saveConfig();
 });
 
+function gaEvent(action, category, label, value) {
+  gtag('event', action, {
+    'event_category': category,
+    'event_label': label,
+    'value': value
+  });
+}
+
 // Log errors
 window.onerror = function(messageOrEvent, source, line, row, err) {
   var errmsg = messageOrEvent.toString() + " [" + source + ": " + line + ", " + row + "]";
@@ -820,7 +828,7 @@ window.onerror = function(messageOrEvent, source, line, row, err) {
   if (config.debug) {
     alert(errmsg);
   } else if (ga) {
-    ga('send', 'event', 'error', errmsg, JSON.stringify(label));
+    gaEvent('error', errmsg, JSON.stringify(label));
   }
 }
 
