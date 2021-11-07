@@ -583,19 +583,9 @@ function onPostDone(adminUrl, rawurl) {
   var output = $("#output");
   output.find("input").val(rawurl);
   output.find("img").attr("src", "https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=>" + encodeURIComponent(rawurl));
-
-  output.find("input").click(function(event) {
-    event.target.select();
-    event.target.setSelectionRange(0, 99999);
-    /* Copy the text inside the text field */
-    document.execCommand("copy");
-    output.find("#notcopied, #copied").toggle();
-    setTimeout(function () {
-      output.find("#notcopied, #copied").toggle();
-    }, 1000);
-  });
   output.show();
 }
+copyOnClick("#output input", "#copy-posted-url")
 
 function onPostFailed(err) {
   setStatus("File upload failed: " + err, {
@@ -840,27 +830,59 @@ setCheckspan($("#viewpwd"), function(isChecked){
 });
 setCheckspan($("#encrypt-options"));
 
-$("#copy-password").click(function(event) {
-  var copied = $("#copied-password");
-  var tohide = copied.next();
-  var pwd = $("#encrypt-password");
-  var type = pwd.attr("type");
-  pwd.attr("type", "text");
-  pwd[0].select();
-  /* Copy the text inside the text field */
-  document.execCommand("copy");
-  pwd.attr("type", type);
-
-  var width = tohide.width();
-  var height = tohide.height();
-  tohide.hide();
-  copied.width(width-6);
-  copied.height(height);
-  copied.css("display", "inline-block");
-  setTimeout(function() {
-    $("#copied-password, #copied-password+span").toggle();
-  }, 1000);
-});
+/**
+ * Copies the value of an HTML <input> element to the clipboard
+ *
+ * @param {string} tocopy - Selector of the input element to copy
+ * @param {string} toclick - Selector of the copy button/element
+ * @param {Object} options - Optional options:
+ *    'copyOk': string to display on successful copy (default is "Copied to clipboard")
+ *    'copyKO': string to display on successful copy (default is "! Cannot copy !")
+ *    'preCopy': function to call before copy (default is none)
+ *    'postCopy': function to call after copy (default is none)
+ */
+function copyOnClick(tocopy, toclick, options) {
+  let copyOk = (options && options.copyOk) || "Copied to clipboard"
+  let copyKO = (options && options.copyKO) || "! Cannot copy !"
+  function showCopyStatus(text) {
+    let temp = input.val()
+    let type = input.attr("type")
+    input.val(text)
+    input.attr("type", "text")
+    $(tocopy + ',' + toclick).prop("disabled", true)
+    setTimeout(function() {
+      input.attr("type", type);
+      input.val(temp)
+      $(tocopy + ',' + toclick).prop("disabled", false)
+      if (options && options.postCopy) {
+        options.postCopy()
+      }
+    }, 1000);
+  }
+  let input = $(tocopy)
+  $(toclick).click(function (event) {
+    if (event.target.disabled) {
+      return
+    }
+    if (options && options.preCopy) {
+      options.preCopy()
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(input.val())
+      .then(function() { showCopyStatus(copyOk) })
+      .catch(function() { showCopyStatus(copyKO) })
+    } else {
+      input[0].select();
+      try {
+        document.execCommand("copy")
+        showCopyStatus(copyOk)
+      } catch(err) {
+        showCopyStatus(copyKO)
+      }
+    }
+  })
+}
+copyOnClick("#encrypt-password", "#copy-password")
 
 $("#generate-password").click(function(event){
   saveConfig();
@@ -876,34 +898,21 @@ function getParameterByName(name) {
   return results === null ? undefined: decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-// Copy shareable link to clipboard
-$("#share-url").click(function() {
-
-  // avoid duplicate clicks
-  if ($("#share-url").attr("disabled")) return;
-  $("#share-url").attr("disabled", true);
-
-  saveConfig();
-
-  // build shareable link
-  var sharedUrl = window.location + "?url=" + encodeURIComponent(config.fetchUrl);
-  if (!config.forgetpwd) {
-    sharedUrl += "&pwd=" + encodeURIComponent(getEncryptPassword());
-  }
-
-  // set shareable link in input box
-  $("#fetch-url").val(sharedUrl);
-
-  // Copy the text inside the text field
-  $("#fetch-url").select();
-  document.execCommand("copy");
-  $("#fetch-url").val("URL copied to clipboard");
-  setTimeout(function () {
-    // restore input
+copyOnClick("#fetch-url", "#share-url", {
+  preCopy: function() {
+    saveConfig();
+    // build shareable link
+    var sharedUrl = window.location + "?url=" + encodeURIComponent(config.fetchUrl);
+    if (!config.forgetpwd) {
+      sharedUrl += "&pwd=" + encodeURIComponent(getEncryptPassword());
+    }
+    // set shareable link in input box
+    $("#fetch-url").val(sharedUrl);
+  },
+  postCopy: function() {
+    // restore url
     $("#fetch-url").val(config.fetchUrl);
-    $("#share-url").attr("disabled", false);
-  }, 1000);
-
+  }
 });
 
 // run when window loading is completed

@@ -43,7 +43,7 @@
             Don't save passwords
             <input id="forgetpwd" type="checkbox" />
           </label>
-          <label>Trim values right? <input id="vtrimr" type="checkbox" /></label>
+          <label title="If checked the trailing spaces in properties values are discarded in generated properties file">Trim values right? <input id="vtrimr" type="checkbox" /></label>
         </div>
       </td>
     </tr>
@@ -56,7 +56,6 @@
             <i class="checkspan-unchecked icon icon-eye"></i>
             <i class="checkspan-checked icon icon-eye-off"></i>
           </span>
-          <span id="copied-password" class="hidden">Copied!</span>
           <span>
             <input id="encrypt-password" type="password" value="p4ssw0rd" />
             <i id="copy-password" class="icon icon-clone" title="Copy password to clipboard"></i>
@@ -137,7 +136,7 @@
             <input id="fetch-url" type="text" class="urlinput"
               placeholder="URL to get properties file" />
             <button id="fetch">Fetch</button>
-            <i class="icon icon-share" id="share-url"></i>
+            <i class="icon icon-share" id="share-url" title="Copy URL of this edited file to clipboard. Share the password separately."></i>
             <label>Authentication? <input type="checkbox" id="fetch-auth" class="toggle" /></label>
           </div>
           <div class="hidden toggle-fetch-auth">
@@ -204,9 +203,11 @@
   </div>
 
   <div class="hidden" id="output">
-    <div id="notcopied">Read properties file from below URL (click/tap to copy to clipboard)</div>
-    <div id="copied" class="hidden">URL copied!</div>
-    <div><input type='text' readonly='readonly' value='' /></div>
+    <div>Generated properties file can be read from below URL</div>
+    <div>
+      <input type='text' readonly='readonly' value='' />
+      <i id="copy-posted-url" class="icon icon-clone" title="Copy url to clipboard"></i>
+    </div>
     <div>Or scan QR Code:</div>
     <img src="" />
   </div>

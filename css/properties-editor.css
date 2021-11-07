@@ -301,13 +301,9 @@ input[type="checkbox"]:checked {
 #copy-password,
 #pname-edit,
 #clear-editor,
+#share-url,
 .encbut {
   cursor: pointer;
-}
-#copied-password {
-  padding: 2px 0;
-  margin: 0;
-  text-align: center;
 }
 .title {
   font-style: italic;
