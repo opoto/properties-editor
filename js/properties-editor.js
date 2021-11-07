@@ -817,7 +817,7 @@ window.onerror = function(messageOrEvent, source, line, row, err) {
   }
   if (config.debug) {
     alert(errmsg);
-  } else if (ga) {
+  } else if (gtag) {
     gaEvent('error', errmsg, JSON.stringify(label));
   }
 }
