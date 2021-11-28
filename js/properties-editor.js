@@ -831,58 +831,80 @@ setCheckspan($("#viewpwd"), function(isChecked){
 setCheckspan($("#encrypt-options"));
 
 /**
- * Copies the value of an HTML <input> element to the clipboard
+ * Copies the value of an HTML <input> element to the clipboard when another element is clicked
  *
- * @param {string} tocopy - Selector of the input element to copy
- * @param {string} toclick - Selector of the copy button/element
+ * @param {string} selector - Selector of the copy button/element
+ *    This HTML element MUST HAVE a "data-copyonclick-from" attribute with the id of the input element to copy
  * @param {Object} options - Optional options:
  *    'copyOk': string to display on successful copy (default is "Copied to clipboard")
  *    'copyKO': string to display on successful copy (default is "! Cannot copy !")
+ *    'statusDelay': time in ms during which the status message is displayed (default is 1 sec)
  *    'preCopy': function to call before copy (default is none)
  *    'postCopy': function to call after copy (default is none)
  */
-function copyOnClick(tocopy, toclick, options) {
+ function copyOnClick(selector, options) {
+
   let copyOk = (options && options.copyOk) || "Copied to clipboard"
   let copyKO = (options && options.copyKO) || "! Cannot copy !"
-  function showCopyStatus(text) {
+  let statusDelay = (options && options.statusDelay) || 1000
+
+  function showCopyStatus(clicked, input, statusText) {
     let temp = input.val()
     let type = input.attr("type")
-    input.val(text)
-    input.attr("type", "text")
-    $(tocopy + ',' + toclick).prop("disabled", true)
+    if (type == "password") {
+      input.attr("type", "text")
+    } else {
+      type = undefined;
+    }
+    input.val(statusText)
+
+    clicked.prop("disabled", true)
+    input.prop("disabled", true)
     setTimeout(function() {
-      input.attr("type", type);
-      input.val(temp)
-      $(tocopy + ',' + toclick).prop("disabled", false)
-      if (options && options.postCopy) {
-        options.postCopy()
+      if (type) {
+        input.attr("type", type)
       }
-    }, 1000);
+      input.val(temp)
+      clicked.prop("disabled", false)
+      input.prop("disabled", false)
+      if (options && options.postCopy) {
+        options.postCopy(input)
+      }
+    }, statusDelay);
   }
-  let input = $(tocopy)
-  $(toclick).click(function (event) {
+
+  $(selector).click(function (event) {
     if (event.target.disabled) {
       return
     }
+    let clicked = $(event.target)
+    let input
+    if (event.target.attributes["data-copyonclick-from"]) {
+      let inputId = event.target.attributes["data-copyonclick-from"].value
+      input = $("#"+inputId)
+    }
+    if(!input || input.length == 0) {
+      console.error("copyOnClick: invalid or missing 'data-copyonclick-from' attribute")
+    }
     if (options && options.preCopy) {
-      options.preCopy()
+      options.preCopy(input)
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(input.val())
-      .then(function() { showCopyStatus(copyOk) })
-      .catch(function() { showCopyStatus(copyKO) })
+      .then(function() { showCopyStatus(clicked, input, copyOk) })
+      .catch(function() { showCopyStatus(clicked, input, copyKO) })
     } else {
       input[0].select();
       try {
         document.execCommand("copy")
-        showCopyStatus(copyOk)
+        showCopyStatus(clicked, input, copyOk)
       } catch(err) {
-        showCopyStatus(copyKO)
+        showCopyStatus(clicked, input, copyKO)
       }
     }
   })
 }
-copyOnClick("#encrypt-password", "#copy-password")
+copyOnClick("#copy-password")
 
 $("#generate-password").click(function(event){
   saveConfig();
@@ -898,8 +920,8 @@ function getParameterByName(name) {
   return results === null ? undefined: decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-copyOnClick("#fetch-url", "#share-url", {
-  preCopy: function() {
+copyOnClick("#share-url", {
+  preCopy: function(input) {
     saveConfig();
     // build shareable link
     var sharedUrl = window.location + "?url=" + encodeURIComponent(config.fetchUrl);
@@ -907,11 +929,11 @@ copyOnClick("#fetch-url", "#share-url", {
       sharedUrl += "&pwd=" + encodeURIComponent(getEncryptPassword());
     }
     // set shareable link in input box
-    $("#fetch-url").val(sharedUrl);
+    input.val(sharedUrl);
   },
-  postCopy: function() {
+  postCopy: function(input) {
     // restore url
-    $("#fetch-url").val(config.fetchUrl);
+    input.val(config.fetchUrl);
   }
 });
 

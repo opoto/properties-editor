@@ -58,7 +58,7 @@
           </span>
           <span>
             <input id="encrypt-password" type="password" value="p4ssw0rd" />
-            <i id="copy-password" class="icon icon-clone" title="Copy password to clipboard"></i>
+            <i id="copy-password" data-copyonclick-from="encrypt-password" class="icon icon-clone" title="Copy password to clipboard"></i>
           </span>
           <i id="generate-password" class="icon icon-arrows-cw" title="Generate password"></i>
           <span id="encrypt-options" value="unchecked" class="toggle" title="Settings">
@@ -136,7 +136,7 @@
             <input id="fetch-url" type="text" class="urlinput"
               placeholder="URL to get properties file" />
             <button id="fetch">Fetch</button>
-            <i class="icon icon-share" id="share-url" title="Copy URL of this edited file to clipboard. Share the password separately."></i>
+            <i class="icon icon-share" id="share-url" data-copyonclick-from="fetch-url" title="Copy URL of this edited file to clipboard. Share the password separately."></i>
             <label>Authentication? <input type="checkbox" id="fetch-auth" class="toggle" /></label>
           </div>
           <div class="hidden toggle-fetch-auth">
