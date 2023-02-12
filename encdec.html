@@ -80,17 +80,16 @@
       </label>
     </li>
     <li>
-      <label>Numbers <input type="checkbox" id="pwd-num" checked/></label>
+      <label>Numbers <input type="checkbox" id="pwd-num" checked/></label> [0-9]
     </li>
     <li>
-      <label>Alphabet <input type="checkbox" id="pwd-alpha" checked/></label>
+      <label>Alphabet <input type="checkbox" id="pwd-alpha" checked/></label> [a-zA-Z]
     </li>
     <li>
-      <label>Symbols <input type="checkbox" id="pwd-sym" /></label>
+      <label>Symbols <input type="checkbox" id="pwd-sym" /></label> (,.!?;:&=+-*/_)
     </li>
     <li>
-      <label>Allow ambiguous chars (1 i I l L 0 o
-        O) <input type="checkbox" id="pwd-ambig" /></label>
+      <label>Allow ambiguous chars <input type="checkbox" id="pwd-ambig" /></label> (1iIlL0oO)
     </li>
   </ul>
   </p>
@@ -160,9 +159,9 @@
       pwdConfig.allowAmbiguous = $("#pwd-ambig").is(":checked");
 
       encConfig = {};
-      encConfig.iterations = $("#enc-iter").children("option:selected").val();
+      encConfig.iterations = Number.parseInt($("#enc-iter").children("option:selected").val());
       encConfig.algorithm = $("#enc-algo").children("option:selected").val();
-      encConfig.keySize = $("#enc-key-size").children("option:selected").val();
+      encConfig.keySize = Number.parseInt($("#enc-key-size").children("option:selected").val());
 
       console.debug("Password config: " + JSON.stringify(pwdConfig));
       console.debug("Crypto config: " + JSON.stringify(encConfig));
