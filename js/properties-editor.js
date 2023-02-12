@@ -908,8 +908,13 @@ copyOnClick("#copy-password")
 
 $("#generate-password").click(function(event){
   saveConfig();
-  $("#encrypt-password").val(generatePassword(config.pwdSz, config.pwdNum,
-      config.pwdAlpha, config.pwdSym));
+  $("#encrypt-password").val(generatePassword({
+    size: config.pwdSz,
+    withNum: config.pwdNum,
+    withAlpha: config.pwdAlpha,
+    withSymbols: config.pwdSym,
+    alowAmbiguous: false}
+  ));
 });
 
 // Extract URL parameters from current location

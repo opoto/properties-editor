@@ -27,89 +27,203 @@
     The salt, iv and cipher text values are base64 encoded.
   </p>
   <p>
-    Encryption is configurable, but this page uses default config:
-    <ul>
-      <li>PBKDF2 is using SHA-256, 100000 iterations, and a random 16 bytes salt to generate a 256 bits key.</li>
-      <li>AES-GCM is using a random IV</li>
-    </ul>
+    Encryption is configurable:
+  <ul>
+    <li>
+      <label>Iterations:
+        <select id="enc-iter">
+          <option value="10">10</option>
+          <option value="100">100</option>
+          <option value="1000">1000</option>
+          <option value="10000">10000</option>
+          <option value="100000" selected>100000</option>
+          <option value="1000000">1000000</option>
+          <option value="10000000">10000000</option>
+        </select>
+      </label>
+    </li>
+    <li>
+      <label>Hash algo:
+        <select id="enc-algo">
+          <option value="SHA-1">SHA-1</option>
+          <option value="SHA-256" selected>SHA-256</option>
+        </select>
+      </label>
+    </li>
+    <li>
+      <label>Key size:
+        <select id="enc-key-size">
+          <option value="128">128</option>
+          <option value="256" selected>256</option>
+        </select>
+      </label>
+    </li>
+    <li>
+      Note: AES-GCM is using a random IV.
+    </li>
+  </ul>
   </p>
   <p>
-    In addition encdec includes a simple password generator. Options are:
-    <ul>
-      <li>Password length</li>
-      <li>Characters to include: numeric, alphabet, and symbols</li>
-    </ul>
-    Ambiguous characters are excluded (1 i I l L 0 o O). 0 and 1 are included when not mixed with alphabet.
+    In addition encdec includes a simple password generator, with options:
+  <ul>
+    <li>
+      <label>Size:
+        <select id="pwd-sz">
+          <option value="8">8</option>
+          <option value="10">10</option>
+          <option value="12" selected>12</option>
+          <option value="14">14</option>
+          <option value="16">16</option>
+          <option value="18">18</option>
+          <option value="20">20</option>
+        </select>
+      </label>
+    </li>
+    <li>
+      <label>Numbers <input type="checkbox" id="pwd-num" checked/></label>
+    </li>
+    <li>
+      <label>Alphabet <input type="checkbox" id="pwd-alpha" checked/></label>
+    </li>
+    <li>
+      <label>Symbols <input type="checkbox" id="pwd-sym" /></label>
+    </li>
+    <li>
+      <label>Allow ambiguous chars (1 i I l L 0 o
+        O) <input type="checkbox" id="pwd-ambig" /></label>
+    </li>
+  </ul>
   </p>
   <table>
     <tr>
       <td>Clear text</td>
-      <td><input id="txt" type="text" size="120" value="this is my secret message"/></td>
+      <td><textarea id="txt" cols="120" rows="5">This is my secret message</textarea></td>
     </tr>
     <tr>
-      <td>Password</td>
-      <td><input id="pwd" type="text" value="p4ssw0rd"/> <button id="genPwd">Renew</button></td>
+      <td>Password(s)</td>
+      <td>
+        <label>Number of passwords:
+          <select id="pwd-number">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </label>
+        <button id="genPwd">Renew</button>
+        (All passwords are combined to encrypt / decrypt)
+        <br/>
+        <input id="pwd1" type="text" value="p4ssw0rd" /><br/>
+        <input id="pwd2" type="text" value="p4ssw0rd" /><br/>
+        <input id="pwd3" type="text" value="p4ssw0rd" />
+      </td>
     </tr>
     <tr>
       <td><button id="encBtn">Encrypt</button></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Encrypted</td>
-      <td><input id="enc" type="text" size="120" value=""/></td>
+      <td><textarea id="enc" cols="120" rows="5"></textarea></td>
     </tr>
     <tr>
       <td><button id="decBtn">Decrypt</button></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Decrypted</td>
-      <td><input id="dec" type="text" size="120" value=""/></td>
+      <td><textarea id="dec" cols="120" rows="5"></textarea></td>
     </tr>
   </table>
   <div id="log"></div>
   <script src="js/encdec.js"></script>
   <script>
 
-if (isCryptoSupported()) {
-  $("#encBtn").click(doEncrypt);
-  $("#decBtn").click(doDecrypt);
-  $("#genPwd").click(newPassword);
-} else {
-  $("#log").append("<p>ERROR: crypto is not supported</p>");
-  $("#encBtn").attr("disabled", "disabled");
-  $("#decBtn").attr("disabled", "disabled");
-}
+    if (isCryptoSupported()) {
+      $("#encBtn").click(doEncrypt);
+      $("#decBtn").click(doDecrypt);
+      $("#genPwd").click(newPassword);
+      $("#pwd-number").on("change", readConfig);
+    } else {
+      $("#log").append("<p>ERROR: crypto is not supported</p>");
+      $("#encBtn").attr("disabled", "disabled");
+      $("#decBtn").attr("disabled", "disabled");
+    }
 
-async function doEncrypt() {
-  var txt = $("#txt").val(),
-      pwd = $("#pwd").val();
-  $("#log").html("");
-  $("#enc").val("");
-  try {
-    cipher = await aesGcmEncrypt(txt, pwd);
-    $("#enc").val(cipher.encoded);
-  } catch (err) {
-    $("#log").append("<p>ERROR: " + err + "</p>");
-  }
-}
-async function doDecrypt() {
-  var enc = $("#enc").val(),
-      pwd = $("#pwd").val();
-  $("#log").html("");
-  $("#dec").val("");
-  try {
-    plaintext = await aesGcmDecrypt(enc, pwd);
-    $("#dec").val(plaintext.decoded);
-  } catch (err) {
-    $("#log").append("<p>ERROR: " + err + "</p>");
-  }
-}
+    let pwdConfig = {};
+    let pwdSize;
+    let pwdNumber;
+    let encConfig = {};
 
-async function newPassword() {
-  $("#pwd").val(generatePassword(10, true, true, true));
-}
+    function readConfig() {
 
+      pwdSize = $("#pwd-sz").children("option:selected").val();
+      pwdConfig.size = pwdSize * pwdNumber;
+      pwdConfig.withNum = $("#pwd-num").is(":checked");
+      pwdConfig.withAlpha = $("#pwd-alpha").is(":checked");
+      pwdConfig.withSymbols = $("#pwd-sym").is(":checked");
+      pwdConfig.allowAmbiguous = $("#pwd-ambig").is(":checked");
+
+      pwdNumber = $("#pwd-number").children("option:selected").val();
+      $("#pwd2").toggle(pwdNumber > 1);
+      $("#pwd3").toggle(pwdNumber > 2);
+
+      encConfig = {};
+      encConfig.iterations = $("#enc-iter").children("option:selected").val();
+      encConfig.algorithm = $("#enc-algo").children("option:selected").val();
+      encConfig.keySize = $("#enc-key-size").children("option:selected").val();
+
+      console.debug("Password config: " + JSON.stringify(pwdConfig));
+      console.debug("Crypto config: " + JSON.stringify(encConfig));
+    }
+
+    function readPassword() {
+      let pwd = $("#pwd1").val();
+      if (pwdNumber > 1) {
+        pwd += $("#pwd2").val();
+      }
+      if (pwdNumber > 2) {
+        pwd += $("#pwd3").val();
+      }
+      console.debug("Password: " + pwd);
+      return pwd;
+    }
+
+    async function doEncrypt() {
+      readConfig();
+      var txt = $("#txt").val(),
+        pwd = readPassword();
+      $("#log").html("");
+      $("#enc").val("");
+      try {
+        cipher = await aesGcmEncrypt(txt, pwd, encConfig);
+        $("#enc").val(cipher.encoded);
+      } catch (err) {
+        $("#log").append("<p>ERROR: " + err + "</p>");
+      }
+    }
+
+    async function doDecrypt() {
+      readConfig();
+      var enc = $("#enc").val(),
+        pwd = readPassword();
+      $("#log").html("");
+      $("#dec").val("");
+      try {
+        plaintext = await aesGcmDecrypt(enc, pwd, encConfig);
+        $("#dec").val(plaintext.decoded);
+      } catch (err) {
+        $("#log").append("<p>ERROR: " + err + "</p>");
+      }
+    }
+
+    async function newPassword() {
+      readConfig();
+      let password = generatePassword(pwdConfig);
+      if (!password) {
+        alert("Check at least one set of characters in the password generator options");
+        return;
+      }
+      let index = 0;
+      while (index < pwdNumber) {
+        let pwd = password.substr(index * pwdSize, 8);
+        index++;
+        $("#pwd"+index).val(pwd);
+      }
+    }
+
+    readConfig();
   </script>
 </body>
 

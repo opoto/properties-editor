@@ -191,30 +191,33 @@ const aesGcmDecrypt = async (b64ciphertext, password, config) => {
 /**
  * Generates a random password in selected characters set
  *
- * @param {Number} size
- * @param {Boolean} withNum
- * @param {Boolean} withAlpha
- * @param {Boolean} withSymbols
+ * @param {Object} config: {size, withNum, withAlpha, withSymbols, allowAmbiguous}
  */
-function generatePassword(size, withNum, withAlpha, withSymbols) {
+function generatePassword(config) {
   // avoid co-existence of ambiguous chars: 0 o O, i I l L 1
   const num = "23456789";
   const numAmbiguous = "01";
   const alpha = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ";
+  const alphaAmbiguous = "oOiIlL";
   const symbols = ",.!?;:&=+-*/_";
   var chars = "";
-  if (withNum) {
-    if (!withAlpha) {
+  if (config.withNum) {
+    if (!config.withAlpha || config.allowAmbiguous) {
       chars += numAmbiguous;
     }
     chars += num;
   }
-  if (withAlpha) chars += alpha;
-  if (withSymbols) chars += symbols;
+  if (config.withAlpha) {
+    chars += alpha;
+    if (config.allowAmbiguous) {
+      chars += alphaAmbiguous;
+    }
+  }
+  if (config.withSymbols) chars += symbols;
   var pwd = "";
-  const array = new Uint8Array(size*2);
+  const array = new Uint8Array(config.size*2);
   window.crypto.getRandomValues(array);
-  for (let i = size; i > 0; i--) {
+  for (let i = config.size; i > 0; i--) {
     var pos = Math.floor((array[i] * (chars.length)) / 256);
     pwd += chars.charAt(pos);
   }
