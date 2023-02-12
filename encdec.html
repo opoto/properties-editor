@@ -148,16 +148,16 @@
 
     function readConfig() {
 
-      pwdSize = $("#pwd-sz").children("option:selected").val();
+      pwdNumber = Number.parseInt($("#pwd-number").children("option:selected").val());
+      $("#pwd2").toggle(pwdNumber > 1);
+      $("#pwd3").toggle(pwdNumber > 2);
+
+      pwdSize = Number.parseInt($("#pwd-sz").children("option:selected").val());
       pwdConfig.size = pwdSize * pwdNumber;
       pwdConfig.withNum = $("#pwd-num").is(":checked");
       pwdConfig.withAlpha = $("#pwd-alpha").is(":checked");
       pwdConfig.withSymbols = $("#pwd-sym").is(":checked");
       pwdConfig.allowAmbiguous = $("#pwd-ambig").is(":checked");
-
-      pwdNumber = $("#pwd-number").children("option:selected").val();
-      $("#pwd2").toggle(pwdNumber > 1);
-      $("#pwd3").toggle(pwdNumber > 2);
 
       encConfig = {};
       encConfig.iterations = $("#enc-iter").children("option:selected").val();
@@ -217,7 +217,7 @@
       }
       let index = 0;
       while (index < pwdNumber) {
-        let pwd = password.substr(index * pwdSize, 8);
+        let pwd = password.substr(index * pwdSize, pwdSize);
         index++;
         $("#pwd"+index).val(pwd);
       }
