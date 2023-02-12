@@ -111,9 +111,10 @@
         <button id="genPwd">Renew</button>
         (All passwords are combined to encrypt / decrypt)
         <br/>
-        <input id="pwd1" type="text" value="p4ssw0rd" /><br/>
-        <input id="pwd2" type="text" value="p4ssw0rd" /><br/>
+        <input id="pwd1" type="text" value="p4ssw0rd" />
+        <input id="pwd2" type="text" value="p4ssw0rd" />
         <input id="pwd3" type="text" value="p4ssw0rd" />
+        (Indicative strength: <span id="pwd-strength"></span>)
       </td>
     </tr>
     <tr>
@@ -167,6 +168,12 @@
       console.debug("Crypto config: " + JSON.stringify(encConfig));
     }
 
+    const passwordStrengths = ["Weak", "Medium", "Strong", "Excellent"];
+    function estimatePasswordStrength(password) {
+      let strength = getPasswordStrength(password);
+      $("#pwd-strength").text(strength.score + " - " + passwordStrengths[strength.level]);
+    }
+
     function readPassword() {
       let pwd = $("#pwd1").val();
       if (pwdNumber > 1) {
@@ -176,6 +183,7 @@
         pwd += $("#pwd3").val();
       }
       console.debug("Password: " + pwd);
+      estimatePasswordStrength(pwd);
       return pwd;
     }
 
@@ -214,6 +222,7 @@
         alert("Check at least one set of characters in the password generator options");
         return;
       }
+      estimatePasswordStrength(password);
       let index = 0;
       while (index < pwdNumber) {
         let pwd = password.substr(index * pwdSize, pwdSize);

@@ -223,3 +223,28 @@ function generatePassword(config) {
   }
   return pwd;
 }
+
+function getPasswordStrength(password) {
+  let nLowerCase = nUpperCase = nNumber = nSymbol = nOther = 0;
+  for (let i = 0; i < password.length; i++) {
+    let c = password[i];
+    if (c.match(/[a-z]/)) {
+      nLowerCase++;
+    } else if (c.match(/[A-Z]/)) {
+      nUpperCase++;
+    } else if (c.match(/[0-9]/)) {
+      nNumber++;
+    } else if (c.match(/[\,\.\!\?\;\:\&\=\+\-\*\/\_]/)) {
+      nSymbol++;
+    } else {
+      nOther++;
+    }
+  }
+  let charSetSize= (nLowerCase>0?26:0) + (nUpperCase>0?26:0) + (nNumber>0?10:0) + (nSymbol>0?13:0) + nOther;
+  let score = Math.round(Math.log2(Math.pow(charSetSize, password.length)));
+  let level = score >= 200 ? 3 : score >= 100 ? 2 : score >= 50 ? 1 : 0;
+  return {
+    score : score,
+    level: level
+  }
+}
