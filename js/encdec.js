@@ -188,32 +188,33 @@ const aesGcmDecrypt = async (b64ciphertext, password, config) => {
   }
 }
 
+/* Characters sets for passwords */
+const C_NUMERIC = "23456789";
+const C_NUMERIC_AMBIGUOUS = "01";
+const C_ALPHABETIC = "abcdefghjkmnpqrstuvwxyz";
+const C_ALPHABETIC_AMBIGUOUS = "oil";
+const C_SYMBOLS = ",.!?;:&=+-*/_()%@#";
+
 /**
  * Generates a random password in selected characters set
  *
- * @param {Object} config: {size, withNum, withAlpha, withSymbols, allowAmbiguous}
+ * @param {Object} {size, withNum, withAlpha, withSymbols, allowAmbiguous}
  */
 function generatePassword(config) {
-  // avoid co-existence of ambiguous chars: 0 o O, i I l L 1
-  const num = "23456789";
-  const numAmbiguous = "01";
-  const alpha = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ";
-  const alphaAmbiguous = "oOiIlL";
-  const symbols = ",.!?;:&=+-*/_";
   var chars = "";
   if (config.withNum) {
     if (!config.withAlpha || config.allowAmbiguous) {
-      chars += numAmbiguous;
+      chars += C_NUMERIC_AMBIGUOUS;
     }
-    chars += num;
+    chars += C_NUMERIC;
   }
   if (config.withAlpha) {
-    chars += alpha;
+    chars += C_ALPHABETIC + C_ALPHABETIC.toUpperCase();
     if (config.allowAmbiguous) {
-      chars += alphaAmbiguous;
+      chars += C_ALPHABETIC_AMBIGUOUS + C_ALPHABETIC_AMBIGUOUS.toUpperCase();
     }
   }
-  if (config.withSymbols) chars += symbols;
+  if (config.withSymbols) chars += C_SYMBOLS;
   var pwd = "";
   const array = new Uint8Array(config.size*2);
   window.crypto.getRandomValues(array);
@@ -224,23 +225,46 @@ function generatePassword(config) {
   return pwd;
 }
 
+/**
+ * Estimate password strength
+ *
+ * @param {String} password
+ * @returns {Object} { score, level }
+ */
 function getPasswordStrength(password) {
-  let nLowerCase = nUpperCase = nNumber = nSymbol = nOther = 0;
-  for (let i = 0; i < password.length; i++) {
-    let c = password[i];
-    if (c.match(/[a-z]/)) {
-      nLowerCase++;
-    } else if (c.match(/[A-Z]/)) {
-      nUpperCase++;
-    } else if (c.match(/[0-9]/)) {
-      nNumber++;
-    } else if (c.match(/[\,\.\!\?\;\:\&\=\+\-\*\/\_]/)) {
-      nSymbol++;
-    } else {
-      nOther++;
+  const CHAR_SETS = [
+    C_ALPHABETIC,
+    C_ALPHABETIC.toUpperCase(),
+    C_ALPHABETIC_AMBIGUOUS + C_ALPHABETIC_AMBIGUOUS.toUpperCase(),
+    C_NUMERIC,
+    C_NUMERIC_AMBIGUOUS,
+    C_SYMBOLS
+  ];
+  let hasCharSet = [];
+  let otherChars = [];
+  let charSetSize = 0;
+  // identify included char sets
+  for (let ic = 0; ic < password.length; ic++) {
+    let inCharSet = false;
+    let c = password[ic];
+    for (let iCharSet = 0; iCharSet < CHAR_SETS.length; iCharSet++ ) {
+      if (CHAR_SETS[iCharSet].indexOf(c) >= 0) {
+        hasCharSet[iCharSet] = true;
+        inCharSet = true;
+      }
+    }
+    if ((!inCharSet) && (!otherChars.includes(c))) {
+      otherChars.push(c);
+      charSetSize++;
     }
   }
-  let charSetSize= (nLowerCase>0?26:0) + (nUpperCase>0?26:0) + (nNumber>0?10:0) + (nSymbol>0?13:0) + nOther;
+  // add found char set sizes
+  for (let iCharSet = 0; iCharSet < CHAR_SETS.length; iCharSet++ ) {
+    if (hasCharSet[iCharSet]) {
+      charSetSize += CHAR_SETS[iCharSet].length;
+    }
+  }
+  // compute entropy and strength level
   let score = Math.round(Math.log2(Math.pow(charSetSize, password.length)));
   let level = score >= 200 ? 3 : score >= 100 ? 2 : score >= 50 ? 1 : 0;
   return {

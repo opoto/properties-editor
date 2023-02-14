@@ -111,9 +111,9 @@
         <button id="genPwd">Renew</button>
         (All passwords are combined to encrypt / decrypt)
         <br/>
-        <input id="pwd1" type="text" value="p4ssw0rd" />
-        <input id="pwd2" type="text" value="p4ssw0rd" />
-        <input id="pwd3" type="text" value="p4ssw0rd" />
+        <input id="pwd1" class="pwd" type="text" value="p4ssw0rd" />
+        <input id="pwd2" class="pwd" type="text" value="p4ssw0rd" />
+        <input id="pwd3" class="pwd" type="text" value="p4ssw0rd" />
         (Indicative strength: <span id="pwd-strength"></span>)
       </td>
     </tr>
@@ -131,10 +131,11 @@
   <script>
 
     if (isCryptoSupported()) {
-      $("#encBtn").click(doEncrypt);
-      $("#decBtn").click(doDecrypt);
-      $("#genPwd").click(newPassword);
+      $("#encBtn").on("click", doEncrypt);
+      $("#decBtn").on("click", doDecrypt);
+      $("#genPwd").on("click", newPassword);
       $("#pwd-number").on("change", readConfig);
+      $(".pwd").on("keyup", () => { estimatePasswordStrength(readPassword());});
     } else {
       $("#log").append("<p>ERROR: crypto is not supported</p>");
       $("#encBtn").attr("disabled", "disabled");
