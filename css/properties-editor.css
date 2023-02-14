@@ -310,6 +310,13 @@ input[type="checkbox"]:checked {
   margin-right: 20px;
 }
 
+.footnote {
+  text-align: right;
+  font-size: small;
+  font-style: italic;
+  color: gray;
+  margin: 20px 20px 0 0;
+}
 #privacy-notice {
   position: fixed;
   left: 0;
