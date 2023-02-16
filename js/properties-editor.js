@@ -77,7 +77,12 @@ function clearStatus() {
 
 /* ------------------- Encryption ----------------- */
 
-const encdec = new EncDec();
+let encdec;
+try {
+  encdec = new EncDec();
+} catch (error) {
+  alert("ERROR: Crypto is not supported by your browser. This application cannot execute.")
+}
 
 function obf(str) {
   return encdec.bufferToBase64(new TextEncoder().encode("A" + str));

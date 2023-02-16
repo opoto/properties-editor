@@ -140,18 +140,22 @@
   <script>
 
     // Initialize library
-    const encdec = new EncDec();
+    let encdec;
+    try {
+      encdec = new EncDec();
 
-    if (encdec.isCryptoSupported()) {
       $("#encBtn").on("click", doEncrypt);
       $("#decBtn").on("click", doDecrypt);
       $("#genPwd").on("click", newPassword);
       $("#pwd-number").on("change", readConfig);
       $(".pwd").on("keyup", () => { estimatePasswordStrength(readPassword());});
-    } else {
+
+    } catch (error) {
+
       $("#log").append("<p>ERROR: crypto is not supported</p>");
       $("#encBtn").attr("disabled", "disabled");
       $("#decBtn").attr("disabled", "disabled");
+
     }
 
     let pwdConfig = {};
