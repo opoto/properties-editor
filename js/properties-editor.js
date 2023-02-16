@@ -77,7 +77,7 @@ function clearStatus() {
 
 /* ------------------- Encryption ----------------- */
 
-const encdec = EncDec();
+const encdec = new EncDec();
 
 function obf(str) {
   return encdec.bufferToBase64(new TextEncoder().encode("A" + str));

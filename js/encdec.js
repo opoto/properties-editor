@@ -5,7 +5,7 @@
 
 /**
  * EncDec library entry point
- * @constructor
+ * @constructor throws an error if required Javascript dependencies are not available
  */
 let EncDec = function() {
 
@@ -24,6 +24,10 @@ let EncDec = function() {
       error(err);
     }
     return supported;
+  }
+
+  if (!isCryptoSupported()) {
+    throw new Error("ENCDEC:NOT_SUPPORTED");
   }
 
   const genRandomBuffer = (len = 16) => {
@@ -219,7 +223,9 @@ let EncDec = function() {
         chars += C_ALPHABETIC_AMBIGUOUS + C_ALPHABETIC_AMBIGUOUS.toUpperCase();
       }
     }
-    if (config.withSymbols) chars += C_SYMBOLS;
+    if (config.withSymbols) {
+      chars += C_SYMBOLS;
+    }
     var pwd = "";
     const array = new Uint8Array(config.size*2);
     window.crypto.getRandomValues(array);

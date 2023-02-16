@@ -140,7 +140,7 @@
   <script>
 
     // Initialize library
-    const encdec = EncDec();
+    const encdec = new EncDec();
 
     if (encdec.isCryptoSupported()) {
       $("#encBtn").on("click", doEncrypt);
