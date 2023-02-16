@@ -22,7 +22,7 @@
 <body>
   <h1>EncDec lib</h1>
   <p>
-    This page demonstrates how the encdec js lib works.
+    This page demonstrates how the <a href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec Javascript library</a> works.
     It encrypts a clear text with an AES-GCM key derived from a password using PBKDF2.
     Encryption output is an encoded string in the form:
   </p>
@@ -72,7 +72,7 @@
   </ul>
   </p>
   <p>
-    In addition encdec includes a simple password generator, with options:
+    In addition EncDec lib includes a simple password generator, with options:
   <ul>
     <li>
       <label>Size:
@@ -139,7 +139,10 @@
   <script src="js/encdec.js"></script>
   <script>
 
-    if (isCryptoSupported()) {
+    // Initialize library
+    const encdec = EncDec();
+
+    if (encdec.isCryptoSupported()) {
       $("#encBtn").on("click", doEncrypt);
       $("#decBtn").on("click", doDecrypt);
       $("#genPwd").on("click", newPassword);
@@ -180,7 +183,7 @@
 
     const passwordStrengths = ["Weak", "Medium", "Strong", "Excellent"];
     function estimatePasswordStrength(password) {
-      let strength = getPasswordStrength(password);
+      let strength = encdec.getPasswordStrength(password);
       $("#pwd-strength").text(strength.score + " - " + passwordStrengths[strength.level]);
     }
 
@@ -204,7 +207,7 @@
       $("#log").html("");
       $("#enc").val("");
       try {
-        cipher = await aesGcmEncrypt(txt, pwd, encConfig);
+        cipher = await encdec.aesGcmEncrypt(txt, pwd, encConfig);
         $("#enc").val(cipher.encoded);
       } catch (err) {
         $("#log").append("<p>ERROR: " + err + "</p>");
@@ -218,7 +221,7 @@
       $("#log").html("");
       $("#dec").val("");
       try {
-        plaintext = await aesGcmDecrypt(enc, pwd, encConfig);
+        plaintext = await encdec.aesGcmDecrypt(enc, pwd, encConfig);
         $("#dec").val(plaintext.decoded);
       } catch (err) {
         $("#log").append("<p>ERROR: " + err + "</p>");
@@ -227,7 +230,7 @@
 
     async function newPassword() {
       readConfig();
-      let password = generatePassword(pwdConfig);
+      let password = encdec.generatePassword(pwdConfig);
       if (!password) {
         alert("Check at least one set of characters in the password generator options");
         return;

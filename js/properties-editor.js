@@ -77,16 +77,18 @@ function clearStatus() {
 
 /* ------------------- Encryption ----------------- */
 
+const encdec = EncDec();
+
 function obf(str) {
-  return bufferToBase64(new TextEncoder().encode("A" + str));
+  return encdec.bufferToBase64(new TextEncoder().encode("A" + str));
 }
 function deobf(str) {
-  return new TextDecoder().decode(base64ToBuffer(str)).substring(1);
+  return new TextDecoder().decode(encdec.base64ToBuffer(str)).substring(1);
 }
 
  async function decryptPValue(ciphered) {
   cachedkey.debug = config.debug;
-  const decrypted = await aesGcmDecrypt(ciphered, getEncryptPassword(), cachedkey);
+  const decrypted = await encdec.aesGcmDecrypt(ciphered, getEncryptPassword(), cachedkey);
   if (decrypted) {
     cachedkey = {
       key: decrypted.config.key,
@@ -98,7 +100,7 @@ function deobf(str) {
   }
 }
 async function encryptPValue(cleartxt) {
-  const encrypted = await aesGcmEncrypt(cleartxt, getEncryptPassword(), {
+  const encrypted = await encdec.aesGcmEncrypt(cleartxt, getEncryptPassword(), {
     iterations: config.encIterations,
     keySize: config.encKeySize,
     algorithm: config.encAlgorithm,
@@ -327,7 +329,7 @@ async function addProperty(appendTo, name, value, desc) {
    inputclass ="",
    isEncrypted = "unchecked",
    noerror = true;
-  if (isEncodedEncrypted(value)) {
+  if (encdec.isEncodedEncrypted(value)) {
     // value is encrypted
     try {
       value = await decryptPValue(value);
@@ -908,7 +910,7 @@ copyOnClick("#copy-password")
 
 $("#generate-password").click(function(event){
   saveConfig();
-  $("#encrypt-password").val(generatePassword({
+  $("#encrypt-password").val(encdec.generatePassword({
     size: config.pwdSz,
     withNum: config.pwdNum,
     withAlpha: config.pwdAlpha,
