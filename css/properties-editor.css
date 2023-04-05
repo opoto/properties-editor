@@ -84,6 +84,10 @@ button:active,
   color: white;
   text-decoration: none;
 }
+#about img {
+  height: 32px;
+  width: 32px;
+}
 
 .fold {
   color: #1992ca;
