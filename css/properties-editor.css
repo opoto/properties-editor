@@ -349,6 +349,10 @@ input[type="checkbox"]:checked {
   color: #1992ca;
 }
 
+.clickable {
+  cursor: pointer;
+  user-select: none;
+}
 
 /* for 480px or less */
 @media screen and (max-width: 480px) {

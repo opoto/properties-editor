@@ -11,13 +11,20 @@
   <script src="js/cash-8.1.4.min.js"></script>
 </head>
 <!-- Google tag (gtag.js) -->
-<!--script async src="https://www.googletagmanager.com/gtag/js?id=G-MYXQ3EPJND"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MYXQ3EPJND"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag() { dataLayer.push(arguments); }
   gtag('js', new Date());
   gtag('config', 'G-MYXQ3EPJND');
-</script-->
+</script>
+<style>
+  #post-hideQr {
+    position: absolute;
+    margin-left: 10px;
+    font-size: 150%;
+  }
+</style>
 
 <body>
   <h1>
@@ -141,12 +148,31 @@
       <td></td>
       <td>
         <button id="post-button">Upload ☁</button>
+        <span id="post-helpButton" class="clickable" title="Help">❔</span>
         <input id="post-fileurl" type="text" size="45" class="hidden post-result"></span>
-        <span id="post-showQr" class="hidden post-result" title="View as QR Code">📱</span>
-        <span id="post-hideQr" class="hidden post-result" title="Hide QR code">⨯</span>
+        <span id="post-showQr" class="hidden post-result clickable" title="View as QR Code">📱</span>
         <span id="post-status" class="hidden post-result"></span>
         <br>
-        <img id="post-qrcode" class="hidden post-result" alt="QR code" src="" />
+      </td>
+    </tr>
+    <tr id="post-help" class="hidden">
+      <td></td>
+      <td>
+        Uploads the encrypted output to <a href="https://dpaste.com">https://dpaste.com</a>
+        temporary cloud storage, and provides the URL and QR Code to retrieve it.<br>
+        By default, the file is stored during 1 day, after which it is deleted.
+        You can extend this default by setting your expected number of days in
+        the "dpaste.days" item of your browser's localStorage, e.g.:<br>
+        <pre>localStorage.setItem("dpaste.days","10")</pre>
+        You can also set your DPaste API token in "dpaste.apiToken" localStorage,
+        so that you can list and delete your files from the DPaste web site.
+      </td>
+    </tr>
+    <tr class="hidden post-result">
+      <td></td>
+      <td>
+        <img id="post-qrcode" alt="QR code" src="" />
+        <span id="post-hideQr" class="clickable" title="Hide QR code">⨯</span>
       </td>
     </tr>
     <tr>
@@ -312,7 +338,8 @@
         // display QR Code
         $("#post-qrcode").attr("src", "https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=>" + encodeURIComponent(fileUrl));
         $("#post-qrcode").hide();
-        $("#post-hideQr").hide();
+        $("#post-hideQr").addClass("hidden");
+        $("#post-help").hide();
       } catch (error) {
         $("#post-status").text(error);
       }
@@ -322,13 +349,17 @@
     $("#post-showQr, #post-hideQr").on("click", () => {
       $("#post-qrcode").toggle();
       $("#post-showQr").toggle();
-      $("#post-hideQr").toggle();
+      $("#post-hideQr").toggleClass("hidden");
     });
 
     function clearPost() {
       $("#post-fileurl").text("");
       $(".post-result").hide();
     }
+
+    $("#post-helpButton").on("click", () => {
+      $("#post-help").toggle();
+    })
 
   </script>
 </body>
