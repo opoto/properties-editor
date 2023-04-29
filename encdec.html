@@ -11,18 +11,19 @@
   <script src="js/cash-8.1.4.min.js"></script>
 </head>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-MYXQ3EPJND"></script>
+<!--script async src="https://www.googletagmanager.com/gtag/js?id=G-MYXQ3EPJND"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag() { dataLayer.push(arguments); }
   gtag('js', new Date());
   gtag('config', 'G-MYXQ3EPJND');
-</script>
+</script-->
 
 <body>
   <h1>EncDec lib</h1>
   <p>
-    This page demonstrates how the <a href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec Javascript library</a> works.
+    This page demonstrates how the <a href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec
+      Javascript library</a> works.
     It encrypts a clear text with an AES-GCM key derived from a password using PBKDF2.
     Encryption output is an encoded string in the form:
   </p>
@@ -88,10 +89,10 @@
       </label>
     </li>
     <li>
-      <label>Numbers <input type="checkbox" id="pwd-num" checked/></label> [0-9]
+      <label>Numbers <input type="checkbox" id="pwd-num" checked /></label> [0-9]
     </li>
     <li>
-      <label>Alphabet <input type="checkbox" id="pwd-alpha" checked/></label> [a-zA-Z]
+      <label>Alphabet <input type="checkbox" id="pwd-alpha" checked /></label> [a-zA-Z]
     </li>
     <li>
       <label>Symbols <input type="checkbox" id="pwd-sym" /></label> (,.!?;:&=+-*/_)
@@ -118,7 +119,7 @@
         </label>
         <button id="genPwd">Renew</button>
         (All passwords are combined to encrypt / decrypt)
-        <br/>
+        <br />
         <input id="pwd1" class="pwd" type="text" value="p4ssw0rd" />
         <input id="pwd2" class="pwd" type="text" value="p4ssw0rd" />
         <input id="pwd3" class="pwd" type="text" value="p4ssw0rd" />
@@ -133,9 +134,12 @@
       <td></td>
       <td>
         <button id="post-button">Upload ☁</button>
-        <input id="post-url" type="hidden" value="https://dpaste.com/api/v2/"/>
-        <span id="post-fileurl" class="post-result"></span>
-        <span id="copy-qrcode" class="hidden post-result" title="View as QR Code">📱</span>
+        <input id="post-fileurl" type="text" size="45" class="hidden post-result"></span>
+        <span id="post-showQr" class="hidden post-result" title="View as QR Code">📱</span>
+        <span id="post-hideQr" class="hidden post-result" title="Hide QR code">⨯</span>
+        <span id="post-status" class="hidden post-result"></span>
+        <br>
+        <img id="post-qrcode" class="hidden post-result" alt="QR code" src="" />
       </td>
     </tr>
     <tr>
@@ -144,7 +148,8 @@
     </tr>
   </table>
   <div id="log"></div>
-  <div class="footnote">This page collects anonymous usage statistics. Passwords and texts (clear and encrypted) never leave your browser</div>
+  <div class="footnote">This page collects anonymous usage statistics. Passwords and texts (clear and encrypted) never
+    leave your browser</div>
   <script src="js/encdec.js"></script>
   <script>
 
@@ -157,7 +162,7 @@
       $("#decBtn").on("click", doDecrypt);
       $("#genPwd").on("click", newPassword);
       $("#pwd-number").on("change", readConfig);
-      $(".pwd").on("keyup", () => { estimatePasswordStrength(readPassword());});
+      $(".pwd").on("keyup", () => { estimatePasswordStrength(readPassword()); });
 
     } catch (error) {
 
@@ -196,7 +201,7 @@
 
     const passwordStrengths = ["Weak", "Medium", "Strong", "Excellent"];
     function estimatePasswordStrength(password) {
-      let strength = encdec.getPasswordStrength(password);
+      const strength = encdec.getPasswordStrength(password);
       $("#pwd-strength").text(strength.score + " - " + passwordStrengths[strength.level]);
     }
 
@@ -215,10 +220,11 @@
 
     async function doEncrypt() {
       readConfig();
-      var txt = $("#txt").val(),
+      const txt = $("#txt").val(),
         pwd = readPassword();
       $("#log").html("");
       $("#enc").val("");
+      clearPost();
       try {
         cipher = await encdec.aesGcmEncrypt(txt, pwd, encConfig);
         $("#enc").val(cipher.encoded);
@@ -229,7 +235,7 @@
 
     async function doDecrypt() {
       readConfig();
-      var enc = $("#enc").val(),
+      const enc = $("#enc").val(),
         pwd = readPassword();
       $("#log").html("");
       $("#dec").val("");
@@ -243,7 +249,7 @@
 
     async function newPassword() {
       readConfig();
-      let password = encdec.generatePassword(pwdConfig);
+      const password = encdec.generatePassword(pwdConfig);
       if (!password) {
         alert("Check at least one set of characters in the password generator options");
         return;
@@ -251,13 +257,72 @@
       estimatePasswordStrength(password);
       let index = 0;
       while (index < pwdNumber) {
-        let pwd = password.substr(index * pwdSize, pwdSize);
+        const pwd = password.substr(index * pwdSize, pwdSize);
         index++;
-        $("#pwd"+index).val(pwd);
+        $("#pwd" + index).val(pwd);
       }
     }
 
     readConfig();
+
+    // ============= POST FILE TO CLOUD
+     
+    $("#post-button").on("click", async () => {
+      const enc = $("#enc").val();
+      let days = localStorage.getItem("dpaste.days");
+      days = days ? days : 1;
+      const post = {
+        method: "POST",
+        mode: "cors", // no-cors, *cors, same-origin
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+          'expiry_days': days,
+          'content': encodeURIComponent(enc)
+        })
+      };
+      const apiToken = localStorage.getItem("dpaste.apitoken");
+      if (apiToken) {
+        post.headers["Authorization"] = "Bearer " + apiToken;
+      }
+      try {
+        /* */
+        const response = await fetch("https://dpaste.com/api/v2/", post);
+        let fileUrl = await response.text();
+        /* */
+        //const fileUrl = "testing";
+        $(".post-result").show();
+        $("#post-fileurl")[0].removeAttribute("disabled");
+        $("#post-fileurl").val(fileUrl);
+        // select & copy to clipboard
+        $("#post-fileurl")[0].focus();
+        $("#post-fileurl")[0].select();
+        document.execCommand('copy');
+        $("#post-status").text("URL copied to clipboard");
+        $("#post-fileurl")[0].setAttribute("disabled", "disabled");
+        $("#post-fileurl").after("Copied to clipboard");
+        // display QR Code
+        $("#post-qrcode").attr("src", "https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=>" + encodeURIComponent(fileUrl));
+        $("#post-qrcode").hide();
+        $("#post-hideQr").hide();
+      } catch (error) {
+        $("#post-status").text(error);
+      }
+      setTimeout(() => $("#post-status").text(""), 2000);
+    });
+
+    $("#post-showQr, #post-hideQr").on("click", () => {
+      $("#post-qrcode").toggle();
+      $("#post-showQr").toggle();
+      $("#post-hideQr").toggle();
+    });
+
+    function clearPost() {
+      $("#post-fileurl").text("");
+      $(".post-result").hide();
+    }
+
   </script>
 </body>
 
