@@ -20,7 +20,14 @@
 </script-->
 
 <body>
-  <h1>EncDec lib</h1>
+  <h1>
+    EncDec lib
+    <span id="about">
+      <a href="https://github.com/opoto/properties-editor/blob/master/README.md">
+        <img alt="GitHub icon" src="img/github-mark.svg" />
+      </a>
+    </span>
+  </h1>
   <p>
     This page demonstrates how the <a href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec
       Javascript library</a> works.
@@ -266,7 +273,7 @@
     readConfig();
 
     // ============= POST FILE TO CLOUD
-     
+
     $("#post-button").on("click", async () => {
       const enc = $("#enc").val();
       let days = localStorage.getItem("dpaste.days");
