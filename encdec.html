@@ -151,7 +151,7 @@
         <span id="post-helpButton" class="clickable" title="Help">❔</span>
         <input id="post-fileurl" type="text" size="45" class="hidden post-result"></span>
         <span id="post-showQr" class="hidden post-result clickable" title="View as QR Code">📱</span>
-        <span id="post-status" class="hidden post-result"></span>
+        <span id="post-status"></span>
         <br>
       </td>
     </tr>
@@ -320,6 +320,7 @@
         post.headers["Authorization"] = "Bearer " + apiToken;
       }
       $("#post-button")[0].setAttribute("disabled", "disabled");
+      $("#post-status").text("Wait while uploading...");
       try {
         /* */
         const response = await fetch("https://dpaste.com/api/v2/", post);
