@@ -8,7 +8,7 @@
   <meta name="description" content="Encryption / decvryption library">
   <title>EncDec lib</title>
   <link rel="stylesheet" href="css/properties-editor.css" />
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="js/cash-8.1.4.min.js"></script>
 </head>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MYXQ3EPJND"></script>
@@ -130,6 +130,15 @@
       <td><textarea id="enc" cols="120" rows="5"></textarea></td>
     </tr>
     <tr>
+      <td></td>
+      <td>
+        <button id="post-button">Upload ☁</button>
+        <input id="post-url" type="hidden" value="https://dpaste.com/api/v2/"/>
+        <span id="post-fileurl" class="post-result"></span>
+        <span id="copy-qrcode" class="hidden post-result" title="View as QR Code">📱</span>
+      </td>
+    </tr>
+    <tr>
       <td><button id="decBtn">Decrypt</button></td>
       <td><textarea id="dec" cols="120" rows="5"></textarea></td>
     </tr>
@@ -165,11 +174,11 @@
 
     function readConfig() {
 
-      pwdNumber = Number.parseInt($("#pwd-number").children("option:selected").val());
+      pwdNumber = Number.parseInt($("#pwd-number").val());
       $("#pwd2").toggle(pwdNumber > 1);
       $("#pwd3").toggle(pwdNumber > 2);
 
-      pwdSize = Number.parseInt($("#pwd-sz").children("option:selected").val());
+      pwdSize = Number.parseInt($("#pwd-sz").val());
       pwdConfig.size = pwdSize * pwdNumber;
       pwdConfig.withNum = $("#pwd-num").is(":checked");
       pwdConfig.withAlpha = $("#pwd-alpha").is(":checked");
@@ -177,9 +186,9 @@
       pwdConfig.allowAmbiguous = $("#pwd-ambig").is(":checked");
 
       encConfig = {};
-      encConfig.iterations = Number.parseInt($("#enc-iter").children("option:selected").val());
-      encConfig.algorithm = $("#enc-algo").children("option:selected").val();
-      encConfig.keySize = Number.parseInt($("#enc-key-size").children("option:selected").val());
+      encConfig.iterations = Number.parseInt($("#enc-iter").val());
+      encConfig.algorithm = $("#enc-algo").val();
+      encConfig.keySize = Number.parseInt($("#enc-key-size").val());
 
       console.debug("Password config: " + JSON.stringify(pwdConfig));
       console.debug("Crypto config: " + JSON.stringify(encConfig));
