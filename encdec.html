@@ -28,6 +28,22 @@
     padding-right: 10px;
     vertical-align: top;
   }
+
+  .config-table {
+    border-collapse: collapse;
+    border: 1px solid black;
+  }
+
+  .config-table td,
+  .config-table th {
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    padding: 2px 15px;
+  }
+
+  #post-status {
+    margin-left: 10px;
+  }
 </style>
 
 <body>
@@ -40,8 +56,7 @@
     </span>
   </h1>
   <p>
-    This page demonstrates how the <a
-      href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec
+    This page demonstrates how the <a href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec
       Javascript library</a> works.
     It encrypts a clear text with an AES-GCM key derived from a password using PBKDF2.
     Encryption output is an encoded string in the form:
@@ -55,10 +70,16 @@
     The salt, iv and cipher text values are base64 encoded.
   </p>
   <p>
-    Encryption is configurable:
-  <ul>
-    <li>
-      <label>Iterations:
+    The password key derivation function is configurable:
+  </p>
+  <table class="config-table">
+    <tr>
+      <th>Iterations</th>
+      <th>Hash Algo</th>
+      <th>Key Size</th>
+    </tr>
+    <tr>
+      <td>
         <select id="enc-iter">
           <option value="10">10</option>
           <option value="100">100</option>
@@ -68,34 +89,37 @@
           <option value="1000000">1000000</option>
           <option value="10000000">10000000</option>
         </select>
-      </label>
-    </li>
-    <li>
-      <label>Hash algo:
+      </td>
+      <td>
         <select id="enc-algo">
           <option value="SHA-1">SHA-1</option>
           <option value="SHA-256" selected>SHA-256</option>
         </select>
-      </label>
-    </li>
-    <li>
-      <label>Key size:
+      </td>
+      <td>
         <select id="enc-key-size">
           <option value="128">128</option>
           <option value="256" selected>256</option>
         </select>
-      </label>
-    </li>
-    <li>
-      Note: AES-GCM is using a random IV.
-    </li>
-  </ul>
+      </td>
+    </tr>
+  </table>
+  <p>
+    Note: AES-GCM is using a random IV.
   </p>
   <p>
     In addition EncDec lib includes a simple password generator, with options:
-  <ul>
-    <li>
-      <label>Size:
+  </p>
+  <table class="config-table">
+    <tr>
+      <th>Size</th>
+      <th>Numbers</th>
+      <th>Alphabet</th>
+      <th>Symbols</th>
+      <th>Ambiguous chars</th>
+    </tr>
+    <tr>
+      <td>
         <select id="pwd-sz">
           <option value="8">8</option>
           <option value="10">10</option>
@@ -105,22 +129,24 @@
           <option value="18">18</option>
           <option value="20">20</option>
         </select>
-      </label>
-    </li>
-    <li>
-      <label>Numbers <input type="checkbox" id="pwd-num" checked /></label> [0-9]
-    </li>
-    <li>
-      <label>Alphabet <input type="checkbox" id="pwd-alpha" checked /></label> [a-zA-Z]
-    </li>
-    <li>
-      <label>Symbols <input type="checkbox" id="pwd-sym" /></label> (,.!?;:&=+-*/_)
-    </li>
-    <li>
-      <label>Allow ambiguous chars <input type="checkbox" id="pwd-ambig" /></label> (1iIlL0oO)
-    </li>
-  </ul>
-  </p>
+      </td>
+      <td>
+        <label class="noselect"><input type="checkbox" id="pwd-num" checked /> [0-9]</label>
+      </td>
+      <td>
+        <label class="noselect"><input type="checkbox" id="pwd-alpha" checked /> [a-zA-Z]</label>
+      </td>
+      <td>
+        <label class="noselect"><input type="checkbox" id="pwd-sym" /> (,.!?;:&=+-*/_)</label>
+      </td>
+      <td>
+        <label class="noselect"><input type="checkbox" id="pwd-ambig" /> (1iIlL0oO)</label>
+      </td>
+    </tr>
+  </table>
+
+  <h2>Try it!</h2>
+
   <table>
     <tr>
       <td>Clear text</td>
@@ -151,13 +177,13 @@
     </tr>
     <tr>
       <td>
-        <button id="post-button"
-          title="Upload encrypted text to temporary cloud storage">Upload</button>
+        <button id="post-button" title="Upload encrypted text to temporary cloud storage">Upload</button>
         <i id="post-helpButton" class="icon icon-help-circled clickable"></i>
       </td>
       <td>
-        <input id="post-fileurl" type="text" size="25" class="hidden post-result"></span>
-        <i id="post-qrcode-show" class="icon icon-eye clickable" title="View as QR Code"></i>
+        <input id="post-fileurl" type="text" size="30" class="hidden post-result"></span>
+        <i id="post-fileurl-copy" class="icon icon-clone post-result" title="Copy URL to clipboard"></i>
+        <i id="post-qrcode-show" class="icon icon-share clickable" title="Share as QR Code"></i>
         <span id="post-status"></span>
         <br>
       </td>
@@ -317,14 +343,30 @@
 
     // ============= POST FILE TO CLOUD
 
+    const POST_DEBUG = false;
+
+    function copyFileURL() {
+      $("#post-fileurl")[0].removeAttribute("disabled");
+      $("#post-fileurl")[0].focus();
+      $("#post-fileurl")[0].select();
+      document.execCommand('copy');
+      $("#post-fileurl")[0].setAttribute("disabled", true);
+      $("#post-status").text("URL copied to clipboard");
+    }
+
+    $("#post-fileurl-copy").on("click", () => {
+      copyFileURL();
+      setTimeout(() => $("#post-status").text(""), 2000);
+    });
+
     $("#post-button").on("click", async () => {
-      clearPost();
+      $("#post-button")[0].setAttribute("disabled", true);
+      $("#post-status").text("Wait while uploading...");
       const enc = $("#enc").val();
       let days = localStorage.getItem("dpaste.days");
       days = days ? days : 1;
       const post = {
         method: "POST",
-        mode: "cors", // no-cors, *cors, same-origin
         headers: {
           "Content-Type": "application/x-www-form-urlencoded"
         },
@@ -337,24 +379,20 @@
       if (apiToken) {
         post.headers["Authorization"] = "Bearer " + apiToken;
       }
-      $("#post-button")[0].setAttribute("disabled", "disabled");
-      $("#post-status").text("Wait while uploading...");
       try {
-        /* */
-        const response = await fetch("https://dpaste.com/api/v2/", post);
-        let fileUrl = await response.text() + ".txt";
-        /* */
-        //const fileUrl = "testing";
+
+        let fileUrl;
+        if (POST_DEBUG) {
+          fileUrl = "https://dpaste.com/DEBUGGING.txt";
+        } else {
+          const response = await fetch("https://dpaste.com/api/v2/", post);
+          fileUrl = await response.text() + ".txt";
+        }
+
         $(".post-result").show();
-        $("#post-fileurl")[0].removeAttribute("disabled");
         $("#post-fileurl").val(fileUrl);
         // select & copy to clipboard
-        $("#post-fileurl")[0].focus();
-        $("#post-fileurl")[0].select();
-        document.execCommand('copy');
-        $("#post-status").text("URL copied to clipboard");
-        $("#post-fileurl")[0].setAttribute("disabled", "disabled");
-        $("#post-fileurl").after("Copied to clipboard");
+        copyFileURL();
         // display QR Code
         new QRCode($("#post-qrcode")[0], {
           text: fileUrl + "#" + lastPassword,
@@ -364,6 +402,7 @@
         });
         $("#post-qrcode-show").show();
         $("#post-help").hide();
+        // done
       } catch (error) {
         $("#post-status").text(error);
       }
@@ -390,6 +429,7 @@
       $("#post-helpButton").toggle();
     });
 
+    clearPost();
   </script>
 </body>
 
