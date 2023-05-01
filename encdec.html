@@ -8,7 +8,10 @@
   <meta name="description" content="Encryption / decvryption library">
   <title>EncDec lib</title>
   <link rel="stylesheet" href="css/properties-editor.css" />
+  <link rel="stylesheet" href="css/fontello.css" />
+  <link rel="stylesheet" href="css/properties-editor.css" />
   <script src="js/cash-8.1.4.min.js"></script>
+  <script src="js/qrcode.min.js"></script>
 </head>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MYXQ3EPJND"></script>
@@ -19,10 +22,11 @@
   gtag('config', 'G-MYXQ3EPJND');
 </script>
 <style>
-  #post-hideQr {
-    position: absolute;
-    margin-left: 10px;
+  .close-td {
     font-size: 150%;
+    text-align: right;
+    padding-right: 10px;
+    vertical-align: top;
   }
 </style>
 
@@ -36,7 +40,8 @@
     </span>
   </h1>
   <p>
-    This page demonstrates how the <a href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec
+    This page demonstrates how the <a
+      href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec
       Javascript library</a> works.
     It encrypts a clear text with an AES-GCM key derived from a password using PBKDF2.
     Encryption output is an encoded string in the form:
@@ -145,21 +150,26 @@
       <td><textarea id="enc" cols="120" rows="5"></textarea></td>
     </tr>
     <tr>
-      <td></td>
       <td>
-        <button id="post-button">Upload ☁</button>
-        <span id="post-helpButton" class="clickable" title="Help">❔</span>
+        <button id="post-button"
+          title="Upload encrypted text to temporary cloud storage">Upload</button>
+        <i id="post-helpButton" class="icon icon-help-circled clickable"></i>
+      </td>
+      <td>
         <input id="post-fileurl" type="text" size="45" class="hidden post-result"></span>
-        <span id="post-showQr" class="hidden post-result clickable" title="View as QR Code">📱</span>
+        <i id="post-qrcode-show" class="icon icon-eye clickable" title="View as QR Code"></i>
         <span id="post-status"></span>
         <br>
       </td>
     </tr>
     <tr id="post-help" class="hidden">
-      <td></td>
+      <td class="close-td">
+        <span id="post-help-close" class="clickable" title="Hide help">⨯</span>
+      </td>
       <td>
         Uploads the encrypted output to <a href="https://dpaste.com">https://dpaste.com</a>
-        temporary cloud storage, and provides the URL and QR Code to retrieve it.<br>
+        temporary cloud storage, and provides the URL and QR Code to retrieve it.
+        The QR code also includes the last password element in the URL fragment.<br>
         By default, the file is stored during 1 day, after which it is deleted.
         You can extend this default by setting your expected number of days in
         the "dpaste.days" item of your browser's localStorage, e.g.:<br>
@@ -168,11 +178,12 @@
         so that you can list and delete your files from the DPaste web site.
       </td>
     </tr>
-    <tr class="hidden post-result">
-      <td></td>
+    <tr id="post-qrcode-tr">
+      <td class="close-td">
+        <span id="post-qrcode-hide" class="clickable" title="Hide QR code">⨯</span>
+      </td>
       <td>
-        <img id="post-qrcode" alt="QR code" src="" />
-        <span id="post-hideQr" class="clickable" title="Hide QR code">⨯</span>
+        <div id="post-qrcode" alt="QR code"></div>
       </td>
     </tr>
     <tr>
@@ -181,8 +192,10 @@
     </tr>
   </table>
   <div id="log"></div>
-  <div class="footnote">This page collects anonymous usage statistics. Passwords and texts (clear and encrypted) never
-    leave your browser</div>
+  <div class="footnote">This page collects anonymous usage statistics. Encrypted and clear texts do
+    not
+    leave your browser, unless you explicitly upload or share it. Passwords are never shared, except
+    when you scan or share the QR code.</div>
   <script src="js/encdec.js"></script>
   <script>
 
@@ -238,13 +251,17 @@
       $("#pwd-strength").text(strength.score + " - " + passwordStrengths[strength.level]);
     }
 
+    let lastPassword;
     function readPassword() {
-      let pwd = $("#pwd1").val();
+      lastPassword = $("#pwd1").val();
+      let pwd = lastPassword;
       if (pwdNumber > 1) {
-        pwd += $("#pwd2").val();
+        lastPassword = $("#pwd2").val();
+        pwd += lastPassword;
       }
       if (pwdNumber > 2) {
-        pwd += $("#pwd3").val();
+        lastPassword = $("#pwd3").val();
+        pwd += lastPassword;
       }
       console.debug("Password: " + pwd);
       estimatePasswordStrength(pwd);
@@ -301,6 +318,7 @@
     // ============= POST FILE TO CLOUD
 
     $("#post-button").on("click", async () => {
+      clearPost();
       const enc = $("#enc").val();
       let days = localStorage.getItem("dpaste.days");
       days = days ? days : 1;
@@ -338,9 +356,13 @@
         $("#post-fileurl")[0].setAttribute("disabled", "disabled");
         $("#post-fileurl").after("Copied to clipboard");
         // display QR Code
-        $("#post-qrcode").attr("src", "https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=fff&data=" + encodeURIComponent(fileUrl));
-        $("#post-qrcode").hide();
-        $("#post-hideQr").addClass("hidden");
+        new QRCode($("#post-qrcode")[0], {
+          text: fileUrl + "#" + lastPassword,
+          width: 200,
+          height: 200,
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        $("#post-qrcode-show").show();
         $("#post-help").hide();
       } catch (error) {
         $("#post-status").text(error);
@@ -350,20 +372,23 @@
       setTimeout(() => $("#post-status").text(""), 2000);
     });
 
-    $("#post-showQr, #post-hideQr").on("click", () => {
-      $("#post-qrcode").toggle();
-      $("#post-showQr").toggle();
-      $("#post-hideQr").toggleClass("hidden");
-    });
+    function toggleQRcode() {
+      $("#post-qrcode-show").toggle();
+      $("#post-qrcode-tr").toggle();
+    }
+    $("#post-qrcode-show, #post-qrcode-hide").on("click", toggleQRcode);
+    toggleQRcode();
 
     function clearPost() {
       $("#post-fileurl").text("");
-      $(".post-result").hide();
+      $(".post-result, #post-qrcode-tr").hide();
+      $("#post-qrcode").empty();
     }
 
-    $("#post-helpButton").on("click", () => {
+    $("#post-helpButton, #post-help-close").on("click", () => {
       $("#post-help").toggle();
-    })
+      $("#post-helpButton").toggle();
+    });
 
   </script>
 </body>
