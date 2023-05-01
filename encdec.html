@@ -156,7 +156,7 @@
         <i id="post-helpButton" class="icon icon-help-circled clickable"></i>
       </td>
       <td>
-        <input id="post-fileurl" type="text" size="45" class="hidden post-result"></span>
+        <input id="post-fileurl" type="text" size="25" class="hidden post-result"></span>
         <i id="post-qrcode-show" class="icon icon-eye clickable" title="View as QR Code"></i>
         <span id="post-status"></span>
         <br>
@@ -360,7 +360,7 @@
           text: fileUrl + "#" + lastPassword,
           width: 200,
           height: 200,
-          correctLevel: QRCode.CorrectLevel.H
+          correctLevel: QRCode.CorrectLevel.M
         });
         $("#post-qrcode-show").show();
         $("#post-help").hide();

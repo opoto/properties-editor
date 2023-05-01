@@ -40,7 +40,7 @@ button, #file-label {
   font-size: 13px;
   text-align: center;
 }
-button:hover,
+button:hover:enabled,
 #file-label:hover {
   background-color: #c4e2a5;
 }
