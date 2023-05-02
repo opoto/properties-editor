@@ -24,4 +24,4 @@ Google Analytics cookies allow to monitor usage of this application and report e
 
 # Encryption mechanisms
 
-The internal encryption library (encdec) uses WebCrypto, and can be reused in other contexts. Check the online [demo](https://opoto.github.io/properties-editor/encdec.html).
+The internal encryption library ([encdec](https://github.com/opoto/properties-editor/blob/master/encdec.md)) uses WebCrypto, and can be reused in other contexts.

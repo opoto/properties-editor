@@ -6,7 +6,7 @@
   <meta http-equiv="x-ua-compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
   <meta name="description" content="Encryption / decvryption library">
-  <title>EncDec lib</title>
+  <title>EncDec Lib Demo</title>
   <link rel="stylesheet" href="css/properties-editor.css" />
   <link rel="stylesheet" href="css/fontello.css" />
   <link rel="stylesheet" href="css/animation.css" />
@@ -45,146 +45,158 @@
   #post-status {
     margin-left: 10px;
   }
+
 </style>
 
 <body>
   <h1>
-    EncDec lib
+    EncDec Lib Demo
     <span id="about">
-      <a href="https://github.com/opoto/properties-editor/blob/master/README.md">
-        <i class="icon icon-github-circled" title="Link to GitHub project"></i>
+      <a href="https://github.com/opoto/properties-editor/blob/master/encdec.md">
+        <i class="icon-github-circled" title="Link to GitHub project"></i>
       </a>
     </span>
   </h1>
   <p>
-    This page demonstrates how the <a href="https://github.com/opoto/properties-editor/blob/master/js/encdec.js">EncDec
-      Javascript library</a> works.
-    It encrypts a clear text with an AES-GCM key derived from a password using PBKDF2.
-    Encryption output is an encoded string in the form:
+    This page shows how to use the <a href="https://github.com/opoto/properties-editor/blob/master/encdec.md">EncDec</a>
+    Javascript library.
   </p>
-  <p>
-    <code>
-      iterations#digest#key-size#salt#iv#ciphertext
-    </code>
-  </p>
-  <p>
-    The salt, iv and cipher text values are base64 encoded.
-  </p>
-  <p>
-    The password key derivation function is configurable:
-  </p>
-  <table class="config-table">
-    <tr>
-      <th>Iterations</th>
-      <th>Hash Algo</th>
-      <th>Key Size</th>
-    </tr>
-    <tr>
-      <td>
-        <select id="enc-iter">
-          <option value="10">10</option>
-          <option value="100">100</option>
-          <option value="1000">1000</option>
-          <option value="10000">10000</option>
-          <option value="100000" selected>100000</option>
-          <option value="1000000">1000000</option>
-          <option value="10000000">10000000</option>
-        </select>
-      </td>
-      <td>
-        <select id="enc-algo">
-          <option value="SHA-1">SHA-1</option>
-          <option value="SHA-256" selected>SHA-256</option>
-        </select>
-      </td>
-      <td>
-        <select id="enc-key-size">
-          <option value="128">128</option>
-          <option value="256" selected>256</option>
-        </select>
-      </td>
-    </tr>
-  </table>
-  <p>
-    Note: AES-GCM is using a random IV.
-  </p>
-  <p>
-    In addition EncDec lib includes a simple password generator, with options:
-  </p>
-  <table class="config-table">
-    <tr>
-      <th>Size</th>
-      <th>Numbers</th>
-      <th>Alphabet</th>
-      <th>Symbols</th>
-      <th>Ambiguous chars</th>
-    </tr>
-    <tr>
-      <td>
-        <select id="pwd-sz">
-          <option value="8">8</option>
-          <option value="10">10</option>
-          <option value="12" selected>12</option>
-          <option value="14">14</option>
-          <option value="16">16</option>
-          <option value="18">18</option>
-          <option value="20">20</option>
-        </select>
-      </td>
-      <td>
-        <label class="noselect"><input type="checkbox" id="pwd-num" checked /> [0-9]</label>
-      </td>
-      <td>
-        <label class="noselect"><input type="checkbox" id="pwd-alpha" checked /> [a-zA-Z]</label>
-      </td>
-      <td>
-        <label class="noselect"><input type="checkbox" id="pwd-sym" /> (,.!?;:&=+-*/_)</label>
-      </td>
-      <td>
-        <label class="noselect"><input type="checkbox" id="pwd-ambig" /> (1iIlL0oO)</label>
-      </td>
-    </tr>
-  </table>
-
-  <h2>Try it!</h2>
 
   <table>
+
     <tr>
       <td>Clear text</td>
       <td><textarea id="txt" cols="120" rows="5">This is my secret message</textarea></td>
     </tr>
+
     <tr>
-      <td>Password(s)</td>
       <td>
-        <label>Number of passwords:
-          <select id="pwd-number">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
-        </label>
-        <button id="genPwd">Renew</button>
-        (All passwords are combined to encrypt / decrypt)
-        <br />
-        <input id="pwd1" class="pwd" type="text" value="p4ssw0rd" />
-        <input id="pwd2" class="pwd" type="text" value="p4ssw0rd" />
-        <input id="pwd3" class="pwd" type="text" value="p4ssw0rd" />
+        Password(s)
+      </td>
+      <td>
+
+        <table class="config-table">
+          <tr>
+            <th>Size</th>
+            <th>Numbers</th>
+            <th>Alphabet</th>
+            <th>Symbols</th>
+            <th>Ambiguous chars</th>
+          </tr>
+          <tr>
+            <td>
+              <select id="pwd-sz">
+                <option value="8">8</option>
+                <option value="10">10</option>
+                <option value="12" selected>12</option>
+                <option value="14">14</option>
+                <option value="16">16</option>
+                <option value="18">18</option>
+                <option value="20">20</option>
+              </select>
+            </td>
+            <td>
+              <label class="noselect"><input type="checkbox" id="pwd-num" checked /> [0-9]</label>
+            </td>
+            <td>
+              <label class="noselect"><input type="checkbox" id="pwd-alpha" checked /> [a-zA-Z]</label>
+            </td>
+            <td>
+              <label class="noselect"><input type="checkbox" id="pwd-sym" /> (,.!?;:&=+-*/_)</label>
+            </td>
+            <td>
+              <label class="noselect"><input type="checkbox" id="pwd-ambig" /> (1iIlL0oO)</label>
+            </td>
+          </tr>
+        </table>
+        <p>
+          <label>Number of passwords:
+            <select id="pwd-number">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </label>
+          (All passwords are combined to encrypt / decrypt)
+        </p>
+      </td>
+    </tr>
+
+
+    <tr>
+      <td>
+        <button id="genPwd">Generate</button>
+      </td>
+      <td>
+        <input id="pwd1" class="pwd" type="text" value="" />
+        <input id="pwd2" class="pwd" type="text" value="" />
+        <input id="pwd3" class="pwd" type="text" value="" />
         (Indicative strength: <span id="pwd-strength"></span>)
       </td>
     </tr>
+
     <tr>
-      <td><button id="encBtn">Encrypt</button></td>
+      <td>
+        Key derivation &nbsp;
+      </td>
+      <td>
+        <table class="config-table">
+          <tr>
+            <th>Iterations</th>
+            <th>Digest</th>
+            <th>Key Size</th>
+          </tr>
+          <tr>
+            <td>
+              <select id="enc-iter">
+                <option value="10">10</option>
+                <option value="100">100</option>
+                <option value="1000">1000</option>
+                <option value="10000">10000</option>
+                <option value="100000" selected>100000</option>
+                <option value="1000000">1000000</option>
+                <option value="10000000">10000000</option>
+              </select>
+            </td>
+            <td>
+              <select id="enc-algo">
+                <option value="SHA-1">SHA-1</option>
+                <option value="SHA-256" selected>SHA-256</option>
+              </select>
+            </td>
+            <td>
+              <select id="enc-key-size">
+                <option value="128">128</option>
+                <option value="256" selected>256</option>
+              </select>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+
+    <tr>
+      <td>
+        <button id="encBtn">Encrypt</button>
+        <span>
+          <i id="cipher-copy" class="icon-clone cipher-copy clickable" title="Copy cipher text to clipboard"></i>
+          <i class="icon-check cipher-copy hidden" title="Copied"></i>
+        </span>
+      </td>
       <td><textarea id="enc" cols="120" rows="5"></textarea></td>
     </tr>
     <tr>
       <td>
         <button id="post-button" title="Upload encrypted text to temporary cloud storage">Upload</button>
-        <i id="post-helpButton" class="icon icon-help-circled clickable"></i>
+        <i id="post-helpButton" class="icon-help-circled clickable"></i>
       </td>
       <td>
         <input id="post-fileurl" type="text" size="30" class="hidden post-result"></span>
-        <i id="post-fileurl-copy" class="icon icon-clone post-result" title="Copy URL to clipboard"></i>
-        <i id="post-qrcode-show" class="icon icon-qrcode clickable" title="Share as QR Code"></i>
+        <i id="post-fileurl-copy" class="icon-clone post-result post-fileurl-copy clickable"
+          title="Copy URL to clipboard"></i>
+        <i class="icon-check post-fileurl-copy hidden" title="Copied"></i>
+        <i id="post-qrcode-show" class="icon-qrcode clickable" title="Show as QR code"></i>
         <span id="post-status"></span>
         <br>
       </td>
@@ -299,6 +311,10 @@
       readConfig();
       const txt = $("#txt").val(),
         pwd = readPassword();
+      if (!pwd) {
+        alert("Enter or generate a password");
+        return;
+      }
       $("#log").html("");
       $("#enc").val("");
       clearPost();
@@ -317,12 +333,22 @@
       $("#log").html("");
       $("#dec").val("");
       try {
-        plaintext = await encdec.aesGcmDecrypt(enc, pwd, encConfig);
+        plaintext = await encdec.aesGcmDecrypt(enc, pwd);
         $("#dec").val(plaintext.decoded);
       } catch (err) {
         $("#log").append("<p>ERROR: " + err + "</p>");
       }
     }
+
+    $("#cipher-copy").on("click", () => {
+      $(".cipher-copy").toggle();
+      try {
+        navigator.clipboard.writeText($("#enc").val());
+      } catch (err) {
+        console.error(err);
+      }
+      setTimeout(() => $(".cipher-copy").toggle(), 1500);
+    });
 
     async function newPassword() {
       readConfig();
@@ -344,7 +370,7 @@
 
     // ============= POST FILE TO CLOUD
 
-    const POST_DEBUG = false;
+    const POST_DEBUG = true;
 
     function copyFileURL() {
       $("#post-fileurl")[0].removeAttribute("disabled");
@@ -356,13 +382,18 @@
     }
 
     $("#post-fileurl-copy").on("click", () => {
+      $(".post-fileurl-copy").toggle();
       copyFileURL();
-      setTimeout(() => $("#post-status").text(""), 2000);
+      setTimeout(() => {
+        $("#post-status").text("");
+        $(".post-fileurl-copy").toggle();
+      }, 2000);
     });
 
     $("#post-button").on("click", async () => {
       $("#post-button")[0].setAttribute("disabled", true);
-      $("#post-status").html('Wait while uploading... <i class="icon-spin6 animate-spin"></i>');
+      clearPost();
+      $("#post-status").html('<i class="icon-spin6 animate-spin"></i> Wait while uploading...');
       const enc = $("#enc").val();
       let days = localStorage.getItem("dpaste.days");
       days = days ? days : 1;
@@ -384,6 +415,7 @@
 
         let fileUrl;
         if (POST_DEBUG) {
+          //return;
           fileUrl = "https://dpaste.com/DEBUGGING.txt";
         } else {
           const response = await fetch("https://dpaste.com/api/v2/", post);
@@ -421,7 +453,7 @@
 
     function clearPost() {
       $("#post-fileurl").text("");
-      $(".post-result, #post-qrcode-tr").hide();
+      $(".post-result, #post-qrcode-tr, #post-qrcode-show").hide();
       $("#post-qrcode").empty();
     }
 

@@ -62,3 +62,7 @@ const password = encdec.generatePassword({
   allowAmbiguous: false,
 });
 ```
+
+## Demo
+
+https://opoto.github.io/properties-editor/encdec.html
