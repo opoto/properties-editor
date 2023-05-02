@@ -370,8 +370,6 @@
 
     // ============= POST FILE TO CLOUD
 
-    const POST_DEBUG = true;
-
     function copyFileURL() {
       $("#post-fileurl")[0].removeAttribute("disabled");
       $("#post-fileurl")[0].focus();
@@ -407,14 +405,14 @@
           'content': encodeURIComponent(enc)
         })
       };
-      const apiToken = localStorage.getItem("dpaste.apitoken");
+      const apiToken = localStorage.getItem("dpaste.apiToken");
       if (apiToken) {
         post.headers["Authorization"] = "Bearer " + apiToken;
       }
       try {
 
         let fileUrl;
-        if (POST_DEBUG) {
+        if (localStorage.getItem("dev.debug") == "true") {
           //return;
           fileUrl = "https://dpaste.com/DEBUGGING.txt";
         } else {
