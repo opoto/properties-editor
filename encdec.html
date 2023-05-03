@@ -292,14 +292,14 @@
 
     let lastPassword;
     function readPassword() {
-      lastPassword = $("#pwd1").val();
+      lastPassword = $("#pwd1").val().trim();
       let pwd = lastPassword;
       if (pwdNumber > 1) {
-        lastPassword = $("#pwd2").val();
+        lastPassword = $("#pwd2").val().trim();
         pwd += lastPassword;
       }
       if (pwdNumber > 2) {
-        lastPassword = $("#pwd3").val();
+        lastPassword = $("#pwd3").val().trim();
         pwd += lastPassword;
       }
       //console.debug("Password: " + pwd);
